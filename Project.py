@@ -7,5 +7,4 @@ import os
 path = os.getcwd()
 
 print(path)
-df=pd.read_csv('BDPV_opendata_installations.csv')
-df=pd.read_csv(BDPV_opendata_installations/BDPV_opendata_installations.csv)
+df=pd.read_csv("./BDPV_opendata_installations/BDPV_opendata_installations.csv", error_bad_lines=False)
