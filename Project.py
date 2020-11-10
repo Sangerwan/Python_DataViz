@@ -8,10 +8,3 @@ type(df)
 MLMQMXAX%Q%X
 
 C
-Q
-C
-EZC
-SµVµZ%Z
-S
-S
-V
