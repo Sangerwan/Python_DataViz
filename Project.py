@@ -14,6 +14,7 @@ path = os.getcwd()
 #orientation_optimum nan
 #pente optimum
 #postal_code_suffix
+#
 ###
 print(path)
 df=pd.read_csv("./BDPV-opendata-installations/BDPV-opendata-installations.csv", sep=';')
