@@ -59,7 +59,7 @@ print(france['an_installation'].unique())
 print(france);
 production = france["production_pvgis"]
 surface = france["surface"]
-france = france[france.surface!=8388607]
+#france = france[france.surface!=8388607]
 
 print(surface.unique())
 #
@@ -69,7 +69,7 @@ print(surface.unique())
 france
 production
 surface
-
+surfaces= surface.unique()
 
 #
 
@@ -100,24 +100,13 @@ if __name__ == '__main__':
                                 GDP per capita for year . Each continent data has its own
                                 colour and symbol size is proportionnal to country population.
                                 Mouse over for details.
-                            ''') # (7)
-
-                            
-
-    ],[
-
-                            html.H2(children=f'Life expectancy vs GDP per capita ({surface})',
-                                        style={'textAlign': 'center', 'color': '#7FDBFF'}), # (5)
-
-                            dcc.Graph(
-                                id='graph1',
-                                figure=fig,
-
-                            ) # (6)
-
-                            
-
-                            
+                            '''), # (7)
+           html.Label('surface'),
+                    dcc.Dropdown(
+                        id="surface-dropdown",
+                        options=[{'label': i, 'value': i} for i in surfaces],
+                        value=surfaces[0]
+                    ),
 
     ]
                                     
@@ -126,6 +115,18 @@ if __name__ == '__main__':
                                     
                                     )
     )
+    @app.callback(
+    dash.dependencies.Output(component_id='graph1', component_property='figure'), # (1)
+    [dash.dependencies.Input(component_id='surface-dropdown', component_property='value')] # (2)
+    )
+    def update_figure(input_value): # (3)
+        francee=france[france.surface == input_value]
+        return px.scatter(francee, y="surface", x="production_pvgis",
+                        color="orientation",
+                        size="nb_panneaux",
+                       hover_name="nb_panneaux") # (4)
+        
+
 
     #
     # RUN APP
