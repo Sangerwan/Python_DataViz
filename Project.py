@@ -78,20 +78,28 @@ if __name__ == '__main__':
 
     app = dash.Dash(__name__) # (3)
 
-    fig = px.scatter(france, x="surface", y="production_pvgis",
+    fig1 = px.scatter(france, x="surface", y="production_pvgis",
                         color="orientation",
                         size="nb_panneaux",
                         hover_name="nb_panneaux") # (4)
 
-
+    fig2 = px.scatter(france, y="surface", x="production_pvgis",
+                        color="orientation",
+                        size="nb_panneaux",
+                        hover_name="nb_panneaux") # (4)
     app.layout = html.Div(children= ([
 
                             html.H1(children=f'Life expectancy vs GDP per capita ({surface})',
                                         style={'textAlign': 'center', 'color': '#7FDBFF'}), # (5)
 
                             dcc.Graph(
+                                id='graph1',
+                                figure=fig1,
+
+                            ), # (6)
+                            dcc.Graph(
                                 id='graph2',
-                                figure=fig,
+                                figure=fig2,
 
                             ), # (6)
 
