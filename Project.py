@@ -125,6 +125,7 @@ if __name__ == '__main__':
                         color="orientation",
                         size="nb_panneaux",
                        hover_name="nb_panneaux") # (4)
+    #lol ceci est un test
         
 
 
