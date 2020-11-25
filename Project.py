@@ -116,8 +116,8 @@ if __name__ == '__main__':
                                     )
     )
     @app.callback(
-    dash.dependencies.Output(component_id='graph1tgyj', component_property='figure'), # (1)
-    [dash.dependencies.Input(component_id='surffoqjofjace-dropdown', component_property='value')] # (2)
+    dash.dependencies.Output(component_id='graph1', component_property='figure'), # (1)
+    [dash.dependencies.Input(component_id='surface-dropdown', component_property='value')] # (2)
     )
     def update_figure(input_value): # (3)
         francee=france[france.surface == input_value]
@@ -130,7 +130,7 @@ if __name__ == '__main__':
 
 
     #
-    # RUN APP2
-    #
+    # RUN APP234
+    #1
 
     app.run_server(debug=False) # (8)
