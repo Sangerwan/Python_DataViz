@@ -4,6 +4,12 @@ import matplotlib.pyplot as plt
 import dash
 import os
 
+import plotly_express as px
+
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
+
 #https://www.data.gouv.fr/fr/datasets/donnees-sur-les-installations-photovoltaique-en-france-et-quelques-pays-europeens/
 
 path = os.getcwd()
@@ -49,3 +55,18 @@ france=df.query("country == 'France'")
 
 print(france['id'])
 print(france['an_installation'].unique())
+
+
+
+#
+# Data
+#
+
+year = 2002
+
+gapminder = px.data.gapminder() # (1)
+years = gapminder["year"].unique()
+data = { year:gapminder.query("year == @year") for year in years} # (2)
+
+
+#
