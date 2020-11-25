@@ -56,17 +56,53 @@ france=df.query("country == 'France'")
 print(france['id'])
 print(france['an_installation'].unique())
 
-
-
+print(france);
+production = france["production_pvgis"]
+surface = france["surface"]
 #
 # Data
 #
 
-year = 2002
-
-gapminder = px.data.gapminder() # (1)
-years = gapminder["year"].unique()
-data = { year:gapminder.query("year == @year") for year in years} # (2)
+france
+production
+surface
 
 
 #
+
+
+if __name__ == '__main__':
+
+    app = dash.Dash(__name__) # (3)
+
+    fig = px.scatter(france, x="surface", y="production_pvgis",
+                        color="orientation",
+                        size="nb_panneaux",
+                        hover_name="nb_panneaux") # (4)
+
+
+    app.layout = html.Div(children=[
+
+                            html.H1(children=f'Life expectancy vs GDP per capita ({surface})',
+                                        style={'textAlign': 'center', 'color': '#7FDBFF'}), # (5)
+
+                            dcc.Graph(
+                                id='graph1',
+                                figure=fig
+                            ), # (6)
+
+                            html.Div(children=f'''
+                                The graph above shows relationship between life expectancy and
+                                GDP per capita for year . Each continent data has its own
+                                colour and symbol size is proportionnal to country population.
+                                Mouse over for details.
+                            '''), # (7)
+
+    ]
+    )
+
+    #
+    # RUN APP
+    #
+
+    app.run_server(debug=True) # (8)
