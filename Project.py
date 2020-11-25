@@ -59,6 +59,9 @@ print(france['an_installation'].unique())
 print(france);
 production = france["production_pvgis"]
 surface = france["surface"]
+france = france[france.surface!=8388607]
+
+print(surface.unique())
 #
 # Data
 #
