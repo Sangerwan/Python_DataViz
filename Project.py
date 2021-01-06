@@ -32,7 +32,9 @@ df['orientation']=df['orientation'].replace("Sur",0);# SUD=0
 df=df[df.panneaux_modele != 'Pas_dans_la_liste_panneaux']
 #remove 0 prod
 df=df[df.production_pvgis != 0]
-
+#remove 0 surface
+df=df[df.surface != 0]
+df=df[df.surface < 5000]
 
 for col in df:
     print(col)
@@ -70,18 +72,28 @@ france
 production
 surface
 surfaces= surface.unique()
+print('surface')
+print(surfaces)
+print(type(surfaces))
+sorted_surface=np.sort(surfaces)
+print(sorted_surface)
+france = france.sort_values(by=['surface'])
 
 #
+
+
 
 
 if __name__ == '__main__':
 
     app = dash.Dash(__name__) # (3)
 
+    
     fig1 = px.scatter(france, x="surface", y="production_pvgis",
                         color="orientation",
                         size="nb_panneaux",
-                        hover_name="nb_panneaux") # (4)
+                        hover_name="nb_panneaux",
+) # (4)
 
     fig2 = px.scatter(france, y="surface", x="production_pvgis",
                         color="orientation",
@@ -89,7 +101,7 @@ if __name__ == '__main__':
                         hover_name="nb_panneaux") # (4)
     app.layout = html.Div(children= ([
 
-                            html.H1(children=f'Life expectancy vs GDP per capita ({surface})',
+                            html.H1(children=f'Production des panneaux solaires en fonction de la surface',
                                         style={'textAlign': 'center', 'color': '#7FDBFF'}), # (5)
 
                             dcc.Graph(
@@ -97,42 +109,44 @@ if __name__ == '__main__':
                                 figure=fig1,
 
                             ), # (6)
+
+                            html.Label('surface'),
+                                    dcc.Dropdown(
+                                        id="surface_dropdown_graph1",
+                                        options=[{'label': i, 'value': i} for i in sorted_surface],
+                                        value=sorted_surface[0]
+                            ),
+
                             dcc.Graph(
                                 id='graph2',
                                 figure=fig2,
 
                             ), # (6)
 
-                            html.Div(children=f'''
+                 html.Div(children=f'''
                                 The graph above shows relationship between life expectancy and
                                 GDP per capita for year . Each continent data has its own
                                 colour and symbol size is proportionnal to country population.
-                                Mouse over for details.
-                            '''), # (7)
-           html.Label('surface'),
-                    dcc.Dropdown(
-                        id="surface-dropdown",
-                        options=[{'label': i, 'value': i} for i in surfaces],
-                        value=surfaces[0]
-                    ),
+                                Mouse over for details.'''), # (7)
+                           
 
-    ]
-                                    
-                                    
-                                    
-                                    
-                                    )
-    )
+                ]))
     @app.callback(
     dash.dependencies.Output(component_id='graph1', component_property='figure'), # (1)
-    [dash.dependencies.Input(component_id='surface-dropdown', component_property='value')] # (2)
+    [dash.dependencies.Input(component_id='surface_dropdown_graph1', component_property='value')] # (2)
     )
     def update_figure(input_value): # (3)
-        francee=france[france.surface == input_value]
-        return px.scatter(francee, y="surface", x="production_pvgis",
+        
+        index=np.asarray(np.where(sorted_surface == input_value))
+        print(index)
+        print(type(index))
+        print(index-5)
+        range=[x for x in [index-5,index+5] if x>=0 and x< np.unique(sorted_surface, return_counts=True) ]
+        return px.scatter(france, x="surface", y="production_pvgis",
                         color="orientation",
                         size="nb_panneaux",
-                       hover_name="nb_panneaux") # (4)
+                       hover_name="nb_panneaux",
+                       range_x= range) # (4)
     #lol ceci est un test
         
 
