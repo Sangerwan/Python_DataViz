@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import dash
 import os
+from scipy import *
 
 import plotly_express as px
 
@@ -34,7 +35,10 @@ df=df[df.panneaux_modele != 'Pas_dans_la_liste_panneaux']
 df=df[df.production_pvgis != 0]
 #remove 0 surface
 df=df[df.surface != 0]
-df=df[df.surface < 5000]
+df=df[df.surface < 1000]
+df=df[df.production_pvgis < 50000 ]
+
+
 
 for col in df:
     print(col)
@@ -68,6 +72,15 @@ print(surface.unique())
 # Data
 #
 
+
+
+production_surface = zeros(len(production))
+for i in range(len(production)):
+    production_surface[i] = production.array[i]/surface.array[i];
+
+france.loc[:,'production/surface'] = production_surface;
+
+print(france.columns);
 france
 production
 surface
@@ -78,6 +91,8 @@ print(type(surfaces))
 sorted_surface=np.sort(surfaces)
 print(sorted_surface)
 france = france.sort_values(by=['surface'])
+
+print(type(df))
 
 #
 
@@ -92,13 +107,16 @@ if __name__ == '__main__':
     fig1 = px.scatter(france, x="surface", y="production_pvgis",
                         color="orientation",
                         size="nb_panneaux",
-                        hover_name="nb_panneaux",
-) # (4)
-
-    fig2 = px.scatter(france, y="surface", x="production_pvgis",
-                        color="orientation",
-                        size="nb_panneaux",
                         hover_name="nb_panneaux") # (4)
+
+    fig2 = px.scatter(france, x="panneaux_marque", y="production/surface",
+                        color="production/surface",
+                        hover_name="nb_panneaux") # (4)
+    
+    fig = px.scatter_geo(france, lon="lon",lat="lat", color="production_pvgis", size="production/surface",
+                            projection="natural earth")
+    
+
     app.layout = html.Div(children= ([
 
                             html.H1(children=f'Production des panneaux solaires en fonction de la surface',
@@ -117,8 +135,15 @@ if __name__ == '__main__':
                                         value=sorted_surface[0]
                             ),
 
+
                             dcc.Graph(
                                 id='graph2',
+                                figure=fig,
+
+                            ), # (6)
+
+                            dcc.Graph(
+                                id='graph3',
                                 figure=fig2,
 
                             ), # (6)
