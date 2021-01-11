@@ -137,19 +137,59 @@ if __name__ == '__main__':
     )
     def update_figure(input_value): # (3)
         
-        index=np.asarray(np.where(sorted_surface == input_value))
+        index=np.where(sorted_surface == input_value)[0]
         print(index)
-        print(type(index))
-        print(index-5)
-        range=[x for x in [index-5,index+5] if x>=0 and x< np.unique(sorted_surface, return_counts=True) ]
-        return px.scatter(france, x="surface", y="production_pvgis",
-                        color="orientation",
-                        size="nb_panneaux",
-                       hover_name="nb_panneaux",
-                       range_x= range) # (4)
-    #lol ceci est un test
-        
+        print(index[0])
+        print(index[0]-5)
+        a = range(index[0]-5,index[0])
 
+        print(a)
+        x_range_min=min(x for x in range(index[0]-5,index[0]+1) if x>=0)
+        x_range_max=max(x for x in range(index[0],index[0]+5) if x<sorted_surface.size)
+
+        nb_panneau_min=min(x for x in france['nb_panneaux'][x_range_min:x_range_max])
+        nb_panneau_max=max(x for x in france['nb_panneaux'][x_range_min:x_range_max])
+
+        y_range_min=min(x for x in france['production_pvgis'][x_range_min:x_range_max])
+        y_range_max=max(x for x in france['production_pvgis'][x_range_min:x_range_max])
+
+        print('surface')
+        print(x_range_min)
+        print(x_range_max)
+        print(france['surface'][x_range_min:x_range_max])
+
+        print('prod')
+        print(y_range_min)
+        print(y_range_max)
+        print(france['production_pvgis'][x_range_min:x_range_max])
+
+        print('nb_panneaux')
+        print(nb_panneau_min)
+        print(nb_panneau_max)
+        print(france['nb_panneaux'][x_range_min:x_range_max])
+
+
+
+        return px.scatter(france,
+                         x=france['surface'][x_range_min:x_range_max],
+                         y=france['production_pvgis'][x_range_min:x_range_max],
+                        color=france['orientation'][x_range_min:x_range_max],
+                        size=france['nb_panneaux'][x_range_min:x_range_max],
+                       hover_name=france['nb_panneaux'][x_range_min:x_range_max],
+                       labels={'x' : 'surface','y' : 'production_pvgis','color' : 'orientation','size' : 'nb_panneaux','hover_name' : 'nb_panneaux'},)
+
+        
+    def filter(data_frame, x_axis, y_axis, centered_x_value=None, x_axis_range=None, color=None, size=None, hover_name=None, label=None):
+        if centered_x_value is not None:
+            index=np.where(data_frame[x_axis] == input_value)[0]
+            if x_axis_range is not None:
+                min_index=min(x for x in range(index[0]-x_axis_range,index[0]+1) if x>=0)
+                max_index=max(x for x in range(index[0],index[0]+x_axis_range) if x<data_frame[x_axis].size)
+                min_value=min(value for value in data_frame[y_axis][min_index:max_index])
+                max_value=max(value for value in data_frame[y_axis][min_index:max_index])
+                return df.scatter(data_frame,x=x_axis,y=y_axis,color=color,size=size,hover_name=hover_name,label=label)
+
+        return df.scatter(data_frame,x=x_axis,y=y_axis,color=color,size=size,hover_name=hover_name,label=label)
 
     #
     # RUN APP234
