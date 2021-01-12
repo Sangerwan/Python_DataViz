@@ -78,7 +78,8 @@ print(type(surfaces))
 sorted_surface=np.sort(surfaces)
 print(sorted_surface)
 france = france.sort_values(by=['surface'])
-
+print('================================')
+print(france["surface"])
 #
 
 
@@ -95,10 +96,7 @@ if __name__ == '__main__':
                         hover_name="nb_panneaux",
 ) # (4)
 
-    fig2 = px.scatter(france, y="surface", x="production_pvgis",
-                        color="orientation",
-                        size="nb_panneaux",
-                        hover_name="nb_panneaux") # (4)
+    fig2 = px.scatter(france, y="surface", x="production_pvgis") # (4)
     app.layout = html.Div(children= ([
 
                             html.H1(children=f'Production des panneaux solaires en fonction de la surface',
@@ -107,6 +105,7 @@ if __name__ == '__main__':
                             dcc.Graph(
                                 id='graph1',
                                 figure=fig1,
+                                
 
                             ), # (6)
 
@@ -144,8 +143,11 @@ if __name__ == '__main__':
         a = range(index[0]-5,index[0])
 
         print(a)
-        x_range_min=min(x for x in range(index[0]-5,index[0]+1) if x>=0)
-        x_range_max=max(x for x in range(index[0],index[0]+5) if x<sorted_surface.size)
+        x_range_min=min(x for x in range(index[0]-50,index[0]+1) if x>=0)
+        x_range_max=max(x for x in range(index[0],index[0]+50) if x<sorted_surface.size)
+
+        surface_min=min(x for x in france['surface'][x_range_min:x_range_max])
+        surface_max=max(x for x in france['surface'][x_range_min:x_range_max])
 
         nb_panneau_min=min(x for x in france['nb_panneaux'][x_range_min:x_range_max])
         nb_panneau_max=max(x for x in france['nb_panneaux'][x_range_min:x_range_max])
@@ -168,14 +170,18 @@ if __name__ == '__main__':
         print(nb_panneau_max)
         print(france['nb_panneaux'][x_range_min:x_range_max])
 
+        print('======france======')
+        print(france)
+        print('======filter======')
+        print(france[france.surface.isin(range(x_range_min,x_range_max))])
+        print(france[france.surface.isin(range(x_range_min,x_range_max))].surface.unique())
 
-
-        return px.scatter(france,
-                         x=france['surface'][x_range_min:x_range_max],
-                         y=france['production_pvgis'][x_range_min:x_range_max],
-                        color=france['orientation'][x_range_min:x_range_max],
-                        size=france['nb_panneaux'][x_range_min:x_range_max],
-                       hover_name=france['nb_panneaux'][x_range_min:x_range_max],
+        return px.scatter(france[france.surface.isin(range(x_range_min,x_range_max))],
+                         x='surface',
+                         y='production_pvgis',
+                        color='orientation',
+                        size='nb_panneaux',
+                       hover_name='nb_panneaux',
                        labels={'x' : 'surface','y' : 'production_pvgis','color' : 'orientation','size' : 'nb_panneaux','hover_name' : 'nb_panneaux'},)
 
         
