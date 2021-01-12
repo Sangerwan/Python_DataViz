@@ -78,7 +78,7 @@ production_surface = zeros(len(production))
 for i in range(len(production)):
     production_surface[i] = production.array[i]/surface.array[i];
 
-france.loc[:,'production/surface'] = production_surface;
+france.loc[:,'production_surface'] = production_surface;
 
 print(france.columns);
 france
@@ -109,19 +109,25 @@ if __name__ == '__main__':
                         size="nb_panneaux",
                         hover_name="nb_panneaux") # (4)
 
-    fig2 = px.scatter(france, x="panneaux_marque", y="production/surface",
-                        color="production/surface",
+    fig2 = px.scatter(france, x="panneaux_marque", y="production_surface",
+                        color="production_surface",
                         hover_name="nb_panneaux") # (4)
     
-    fig = px.scatter_geo(france, lon="lon",lat="lat", color="production_pvgis", size="production/surface",
+    centerLatLon = dict({'lat': 46, 'lon': 0});
+    fig = px.scatter_geo(france, lon="lon",lat="lat",scope='europe',size_max=23, center=centerLatLon, color="production_pvgis", size="production_surface",
                             projection="natural earth")
     
 
     app.layout = html.Div(children= ([
 
-                            html.H1(children=f'Production des panneaux solaires en fonction de la surface',
+                            html.H1( children=f'Production des panneaux solaires en fonction de la surface',
                                         style={'textAlign': 'center', 'color': '#7FDBFF'}), # (5)
 
+                            html.Div(dcc.Input(id='input-on-submit', type='text')),
+                                html.Button('Submit', id='submit-val', n_clicks=0),
+                                html.Div(className="app-header", id='container-button-basic', children='Enter a value and press submit'),
+
+                            
                             dcc.Graph(
                                 id='graph1',
                                 figure=fig1,
@@ -135,20 +141,33 @@ if __name__ == '__main__':
                                         value=sorted_surface[0]
                             ),
 
+                            
+                                
+                           html.Div(className= "map", children=    [ dcc.Graph(
+                                    id='map',
+                                    figure=fig
+                                ),
+                                dcc.Graph(
+                                    id='graph3',
+                                    figure=fig2,
 
-                            dcc.Graph(
-                                id='graph2',
-                                figure=fig,
+                                )],
+                            ),
 
-                            ), # (6)
+                           html.Div(children=
+                                    dcc.Slider(
+                                    id='prod-slider',
+                                    min=france['production_surface'].min(),
+                                    max=france['production_surface'].max(),
+                                    value=france['production_surface'].median(),
+                                    step=10
+                                ),                                      
+                           ),
 
-                            dcc.Graph(
-                                id='graph3',
-                                figure=fig2,
+                                
+                            
 
-                            ), # (6)
-
-                 html.Div(children=f'''
+                 html.Div(className="app-header",children=f'''
                                 The graph above shows relationship between life expectancy and
                                 GDP per capita for year . Each continent data has its own
                                 colour and symbol size is proportionnal to country population.
@@ -156,6 +175,26 @@ if __name__ == '__main__':
                            
 
                 ]))
+
+
+    @app.callback(
+        dash.dependencies.Output('map', 'figure'),
+        dash.dependencies.Input('prod-slider', 'value')
+    )
+    def update_figure(input_value):
+        proddf = france[france.production_surface >= input_value]
+
+        centerLatLon = dict({'lat': 46, 'lon': 0});
+        fig = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe', size_max=5, center=centerLatLon, color="production_pvgis", size="production_surface",
+                            projection="natural earth")
+
+        fig.update_layout(transition_duration=500)
+        return fig
+
+
+
+
+
     @app.callback(
     dash.dependencies.Output(component_id='graph1', component_property='figure'), # (1)
     [dash.dependencies.Input(component_id='surface_dropdown_graph1', component_property='value')] # (2)
@@ -166,12 +205,12 @@ if __name__ == '__main__':
         print(index)
         print(type(index))
         print(index-5)
-        range=[x for x in [index-5,index+5] if x>=0 and x< np.unique(sorted_surface, return_counts=True) ]
+        #range=[x for x in [index-5,index+5] if x>=0 and x< np.unique(sorted_surface, return_counts=True) ]
         return px.scatter(france, x="surface", y="production_pvgis",
                         color="orientation",
                         size="nb_panneaux",
                        hover_name="nb_panneaux",
-                       range_x= range) # (4)
+                       range_x= (0,2)) # (4)
     #lol ceci est un test
         
 
