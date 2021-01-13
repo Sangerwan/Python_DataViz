@@ -22,9 +22,9 @@ path = os.getcwd()
 data_url="https://www.data.gouv.fr/fr/datasets/r/12b8efc1-6c38-46ab-8cfa-6220970fa260"
 request = requests.get(data_url, stream=True)
 zip = zipfile.ZipFile(io.BytesIO(request.content))
-zip.extractall("./")
+zip.extractall("./data")
 
-df=pd.read_csv("./BDPV-opendata-installations/BDPV-opendata-installations.csv", sep=';')
+df=pd.read_csv("./data/BDPV-opendata-installations.csv", sep=';')
 
 #Remove sud
 df['orientation']=df['orientation'].replace("Sud",0);# SUD=0
