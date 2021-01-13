@@ -141,60 +141,144 @@ if __name__ == '__main__':
 
                                 )],
                             ),
-
-                          dcc.Slider(
+                       
+                          dcc.RangeSlider(
                                         id='surface-slider',
                                         min=france['surface'].min(),
                                         max=france['surface'].max(),
-                                        value=france['surface'].median(),
-                                        step=10
-                                    ),     
+                                       
+                                        value=[int(france['surface'].median()),int(france['surface'].median()*2)],
+                                        step=2,
+                                         marks={
+                                            0  : '0 m²',
+                                            10 : '10 m²',
+                                            50 : '50 m²',
+                                            100 : '100 m²',
+                                            200 : '200 m²',
+                                            300 : '300 m²',
+                                            500 : '500 m²',
+                                            800 : '800 m²',
+                                        },
+                           ),  
+                          
+
+                           html.Div(className= "graph2", children=    [ 
+                               html.Div(className= "map", children  =[
+
+                                   dcc.Graph(
+                                    id='graphFabriquants',
+                                    figure=fig2,
+
+                                   ),
+                                   dcc.Graph(
+                                        id='mapFabriquants',
+                                        figure=fig
+                                   ),
+                                   
+                               ])
+                               
+                            ]),
+                       
+                          dcc.RangeSlider(
+                                        id='surface-slider_Fabriquants',
+                                        min=france['surface'].min(),
+                                        max=france['surface'].max(),
+                                       
+                                        value=[int(france['surface'].median()),int(france['surface'].median()*2)],
+                                        step=2,
+                                         marks={
+                                            0  : '0 m²',
+                                            10 : '10 m²',
+                                            50 : '50 m²',
+                                            100 : '100 m²',
+                                            200 : '200 m²',
+                                            300 : '300 m²',
+                                            500 : '500 m²',
+                                            800 : '800 m²',
+                                        },
+                           ),
 
                                 
                             
 
                  html.Div(className="app-header",children=f'''
-                                The graph above shows relationship between life expectancy and
-                                GDP per capita for year . Each continent data has its own
-                                colour and symbol size is proportionnal to country population.
-                                Mouse over for details.'''), # (7)
+                                Données utilisées : https://www.data.gouv.fr/fr/datasets/donnees-sur-les-installations-photovoltaique-en-france-et-quelques-pays-europeens/  \n
+                                Réalisé par Erwan Sangchanmahola et Olivier Troissant \n
+                                Cadre d'étude : ESIEE Paris'''), # (7)
                            
 
                 ]))
 
 
-    @app.callback(
-        dash.dependencies.Output('map', 'figure'),
-        dash.dependencies.Input('surface-slider', 'value')
+
+
+
+@app.callback(
+    dash.dependencies.Output('map', 'figure'),
+    dash.dependencies.Input('surface-slider', 'value')
+)
+def update_figure(input_value):
+    proddf = france[france.surface <= input_value[1]]
+    proddf = proddf[proddf.surface >= input_value[0]]
+        
+
+    centerLatLon = dict({'lat': 46, 'lon': 0});
+    fig = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe', size_max=10, center=centerLatLon, color="production_surface", size="production_surface",
+                        projection="natural earth")
+
+    fig.update_layout(transition_duration=500, geo = dict(projection_scale=5))
+    return fig
+
+
+@app.callback(
+        dash.dependencies.Output('mapFabriquants', 'figure'),
+        dash.dependencies.Input('surface-slider_Fabriquants', 'value')
     )
-    def update_figure(input_value):
-        proddf = france[france.surface >= input_value]
+def update_figure(input_value):
+    proddf = france[france.surface <= input_value[1]]
+    proddf = proddf[proddf.surface >= input_value[0]]
+        
 
-        centerLatLon = dict({'lat': 46, 'lon': 0});
-        fig = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe', size_max=10, center=centerLatLon, color="production_surface", size="production_surface",
-                            projection="natural earth")
+    centerLatLon = dict({'lat': 46, 'lon': 0});
+    fig = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe', size_max=10, center=centerLatLon, color="production_surface", size="production_surface",
+                        projection="natural earth")
 
-        fig.update_layout(transition_duration=500, geo = dict(projection_scale=5))
-        return fig
+    fig.update_layout(transition_duration=500, geo = dict(projection_scale=5))
+    return fig
 
-
-
-
-    @app.callback(
-        dash.dependencies.Output('graph3', 'figure'),
-        dash.dependencies.Input('surface-slider', 'value')
+@app.callback(
+        dash.dependencies.Output('graphFabriquants', 'figure'),
+        dash.dependencies.Input('surface-slider_Fabriquants', 'value')
     )
-    def update_figure(input_value):
-        proddf = france[france.surface >= input_value]
+def update_figure(input_value):
+    proddf = france[france.surface <= input_value[1]]
+    proddf = proddf[proddf.surface >= input_value[0]]
+        
 
-        centerLatLon = dict({'lat': 35, 'lon': -5});
-        fig2 = px.scatter(proddf, x="pente", y="orientation",
-                         color="production_surface",
-                        hover_name="nb_panneaux")
+    centerLatLon = dict({'lat': 46, 'lon': 0});
+    fig = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe', size_max=10, center=centerLatLon, color="production_surface", size="production_surface",
+                        projection="natural earth")
 
-        fig2.update_layout(transition_duration=500)
-        fig2.update_coloraxes(showscale=False)
-        return fig2
+    fig.update_layout(transition_duration=500, geo = dict(projection_scale=5))
+    return fig
+
+
+@app.callback(
+    dash.dependencies.Output('graph3', 'figure'),
+    dash.dependencies.Input('surface-slider', 'value')
+)
+def update_figure(input_value):
+    proddf = france[france.surface <= input_value[1]]
+    proddf = proddf[proddf.surface >= input_value[0]]
+
+    centerLatLon = dict({'lat': 35, 'lon': -5});
+    fig2 = px.scatter(proddf, x="pente", y="orientation",
+                        color="production_surface",
+                    hover_name="nb_panneaux")
+
+    fig2.update_layout(transition_duration=500)
+    fig2.update_coloraxes(showscale=False)
+    return fig2
 
 
 
