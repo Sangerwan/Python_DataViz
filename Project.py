@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import dash
 import os
+from scipy import *
 
 import plotly_express as px
 
@@ -34,52 +35,47 @@ df=df[df.panneaux_modele != 'Pas_dans_la_liste_panneaux']
 df=df[df.production_pvgis != 0]
 #remove 0 surface
 df=df[df.surface != 0]
-df=df[df.surface < 5000]
+df=df[df.surface < 1000]
+df=df[df.production_pvgis < 50000 ]
+
+
 
 for col in df:
     print(col)
     print(df[col].unique())
 
-print('describe')
-print(df.describe())
-print('value')
-print(df.values)
-print('column')
-print(df.columns)
-print('index')
-print(df.index)
 i= df.columns
 
 country= df['country']
-print(country.unique())
 
 france=df.query("country == 'France'")
 
-print(france['id'])
-print(france['an_installation'].unique())
 
-print(france);
+
 production = france["production_pvgis"]
 surface = france["surface"]
 #france = france[france.surface!=8388607]
 
-print(surface.unique())
+
 #
 # Data
 #
 
-france
-production
-surface
+
+
+production_surface = zeros(len(production))
+for i in range(len(production)):
+    production_surface[i] = production.array[i]/surface.array[i];
+
+france.loc[:,'production_surface'] = production_surface;
+
+
 surfaces= surface.unique()
-print('surface')
-print(surfaces)
-print(type(surfaces))
+
 sorted_surface=np.sort(surfaces)
-print(sorted_surface)
+
 france = france.sort_values(by=['surface'])
-print('================================')
-print(france["surface"])
+
 #
 
 
@@ -93,15 +89,27 @@ if __name__ == '__main__':
     fig1 = px.scatter(france, x="surface", y="production_pvgis",
                         color="orientation",
                         size="nb_panneaux",
-                        hover_name="nb_panneaux",
-) # (4)
+                        hover_name="nb_panneaux") # (4)
 
-    fig2 = px.scatter(france, y="surface", x="production_pvgis") # (4)
+    fig2 = px.scatter(france, x="pente", y="orientation",
+                        color="production_surface",
+                        hover_name="nb_panneaux") # (4)
+    
+    centerLatLon = dict({'lat': 35, 'lon': -5});
+    fig = px.scatter_geo(france, lon="lon",lat="lat",scope='europe',size_max=15, center=centerLatLon, color="production_surface", size="production_surface",
+                            projection="natural earth")
+    
+
     app.layout = html.Div(children= ([
 
-                            html.H1(children=f'Production des panneaux solaires en fonction de la surface',
+                            html.H1( children=f'Production des panneaux solaires en fonction de la surface',
                                         style={'textAlign': 'center', 'color': '#7FDBFF'}), # (5)
 
+                            html.Div(dcc.Input(id='input-on-submit', type='text')),
+                                html.Button('Submit', id='submit-val', n_clicks=0),
+                                html.Div(className="app-header", id='container-button-basic', children='Enter a value and press submit'),
+
+                            
                             dcc.Graph(
                                 id='graph1',
                                 figure=fig1,
@@ -116,13 +124,36 @@ if __name__ == '__main__':
                                         value=sorted_surface[0]
                             ),
 
-                            dcc.Graph(
-                                id='graph2',
-                                figure=fig2,
+                            
+                                
+                           html.Div(className= "graph2", children=    [ 
+                               html.Div(className= "map", children  =[
+                                   dcc.Graph(
+                                        id='map',
+                                        figure=fig
+                                    ),
+                                   
+                               ]),
+                               
+                                dcc.Graph(
+                                    id='graph3',
+                                    figure=fig2,
 
-                            ), # (6)
+                                )],
+                            ),
 
-                 html.Div(children=f'''
+                          dcc.Slider(
+                                        id='surface-slider',
+                                        min=france['surface'].min(),
+                                        max=france['surface'].max(),
+                                        value=france['surface'].median(),
+                                        step=10
+                                    ),     
+
+                                
+                            
+
+                 html.Div(className="app-header",children=f'''
                                 The graph above shows relationship between life expectancy and
                                 GDP per capita for year . Each continent data has its own
                                 colour and symbol size is proportionnal to country population.
@@ -130,6 +161,45 @@ if __name__ == '__main__':
                            
 
                 ]))
+
+
+    @app.callback(
+        dash.dependencies.Output('map', 'figure'),
+        dash.dependencies.Input('surface-slider', 'value')
+    )
+    def update_figure(input_value):
+        proddf = france[france.surface >= input_value]
+
+        centerLatLon = dict({'lat': 46, 'lon': 0});
+        fig = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe', size_max=10, center=centerLatLon, color="production_surface", size="production_surface",
+                            projection="natural earth")
+
+        fig.update_layout(transition_duration=500, geo = dict(projection_scale=5))
+        return fig
+
+
+
+
+    @app.callback(
+        dash.dependencies.Output('graph3', 'figure'),
+        dash.dependencies.Input('surface-slider', 'value')
+    )
+    def update_figure(input_value):
+        proddf = france[france.surface >= input_value]
+
+        centerLatLon = dict({'lat': 35, 'lon': -5});
+        fig2 = px.scatter(proddf, x="pente", y="orientation",
+                         color="production_surface",
+                        hover_name="nb_panneaux")
+
+        fig2.update_layout(transition_duration=500)
+        fig2.update_coloraxes(showscale=False)
+        return fig2
+
+
+
+
+
     @app.callback(
     dash.dependencies.Output(component_id='graph1', component_property='figure'), # (1)
     [dash.dependencies.Input(component_id='surface_dropdown_graph1', component_property='value')] # (2)
