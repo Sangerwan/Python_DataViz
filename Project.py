@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import dash
 import os
-from scipy import *
 
 import plotly_express as px
 
@@ -39,11 +38,11 @@ df=df[df.surface != 0]
 
 france=df.query("country == 'France'")
 
-production_surface = zeros(len(france.production_pvgis))
+production_surface = np.zeros(len(france.production_pvgis))
 for i in range(len(france.production_pvgis)):
     production_surface[i] = france.production_pvgis.array[i]/france.surface.array[i];
 
-france.loc[:,'production_surface'] = production_surface;
+france.insert(6,'production_surface',production_surface,True);
 
 if __name__ == '__main__':
 
@@ -63,7 +62,7 @@ if __name__ == '__main__':
                         hover_name="nb_panneaux") # (4)
     
     centerLatLon = dict({'lat': 35, 'lon': -5});
-    fig = px.scatter_geo(france, lon="lon",lat="lat",scope='europe',size_max=15, center=centerLatLon, color="production_surface", size="production_surface",
+    fig = px.scatter_geo(france, lon="lon",lat="lat",scope='europe',size_max=15, center=centerLatLon, color="production_surface", size="surface",
                             projection="natural earth")
     
 
@@ -108,7 +107,7 @@ if __name__ == '__main__':
                                     #),
                                     dcc.Dropdown(
                                         id="year_dropdown_historgram_brand",
-                                        options=[{'label': i, 'value': i} for i in sort(france.an_installation.unique())],
+                                        options=[{'label': i, 'value': i} for i in np.sort(france.an_installation.unique())],
                                         placeholder="Select a year",
                                         
 
@@ -123,14 +122,12 @@ if __name__ == '__main__':
 
                             
                                 
-                           html.Div(className= "graph2", children=    [ 
-                               html.Div(className= "map", children  =[
-                                   dcc.Graph(
-                                        id='map',
-                                        figure=fig
-                                    ),
-                                   
-                               ]),
+                           html.Div(className= "graphSurfaceProduction", children=    [ 
+                               
+                                dcc.Graph(
+                                    id='map',
+                                    figure=fig
+                                ),                                   
                                
                                 dcc.Graph(
                                     id='graph3',
@@ -141,28 +138,25 @@ if __name__ == '__main__':
                        
                           dcc.RangeSlider(
                                         id='surface-slider',
-                                        min=france['surface'].min(),
-                                        max=france['surface'].max(),
+                                        min=np.log(france['surface'].min()),
+                                        max=6,
                                        
-                                        value=[int(france['surface'].median()),int(france['surface'].median()*2)],
-                                        step=2,
+                                        value=[4,5],
+                                        step=0.5,
                                          marks={
                                             0  : '0 m²',
-                                            10 : '10 m²',
-                                            50 : '50 m²',
-                                            100 : '100 m²',
-                                            200 : '200 m²',
-                                            300 : '300 m²',
-                                            500 : '500 m²',
-                                            800 : '800 m²',
+                                            1 : '10 m²',
+                                            2 : '100 m²',
+                                            3 : '1000 m²',
+                                            4 : '1 Hectares',
+                                            5 : '10 Hectares',
+                                            6 : '100 Hectares',
                                         },
                            ),  
                           
 
-                           html.Div(className= "graph2", children=    [ 
-                               html.Div(className= "map", children  =[
-
-                                   dcc.Graph(
+                           html.Div(className= "graphConstructeur", children=    [ 
+                                    dcc.Graph(
                                     id='graphFabriquants',
                                     figure=fig2,
 
@@ -172,28 +166,26 @@ if __name__ == '__main__':
                                         figure=fig
                                    ),
                                    
-                               ])
                                
                             ]),
                        
                           dcc.RangeSlider(
-                                        id='surface-slider_Fabriquants',
-                                        min=france['surface'].min(),
-                                        max=france['surface'].max(),
+                                        id='surface-slider2',
+                                        min=np.log(france['surface'].min()),
+                                        max=6,
                                        
-                                        value=[int(france['surface'].median()),int(france['surface'].median()*2)],
-                                        step=2,
+                                        value=[4,5],
+                                        step=0.5,
                                          marks={
                                             0  : '0 m²',
-                                            10 : '10 m²',
-                                            50 : '50 m²',
-                                            100 : '100 m²',
-                                            200 : '200 m²',
-                                            300 : '300 m²',
-                                            500 : '500 m²',
-                                            800 : '800 m²',
+                                            1 : '10 m²',
+                                            2 : '100 m²',
+                                            3 : '1000 m²',
+                                            4 : '1 Hectares',
+                                            5 : '10 Hectares',
+                                            6 : '100 Hectares',
                                         },
-                           ),
+                           ),  
 
                                 
                             
@@ -207,20 +199,19 @@ if __name__ == '__main__':
                 ]))
 
 
-
-
-
 @app.callback(
     dash.dependencies.Output('map', 'figure'),
     dash.dependencies.Input('surface-slider', 'value')
 )
 def update_figure(input_value):
-    proddf = france[france.surface <= input_value[1]]
-    proddf = proddf[proddf.surface >= input_value[0]]
+    imax= np.exp(input_value[1]);
+    imin= np.exp(input_value[0]);
+    proddf = france[france.surface <= imax]
+    proddf = proddf[proddf.surface >= imin]
         
 
     centerLatLon = dict({'lat': 46, 'lon': 0});
-    fig = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe', size_max=10, center=centerLatLon, color="production_surface", size="production_surface",
+    fig = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe', size_max=10, center=centerLatLon, color="production_surface", size="surface",
                         projection="natural earth")
 
     fig.update_layout(transition_duration=500, geo = dict(projection_scale=5))
@@ -232,28 +223,33 @@ def update_figure(input_value):
         dash.dependencies.Input('surface-slider_Fabriquants', 'value')
     )
 def update_figure(input_value):
-    proddf = france[france.surface <= input_value[1]]
-    proddf = proddf[proddf.surface >= input_value[0]]
+    imax= np.exp(input_value[1]);
+    imin= np.exp(input_value[0]);
+    proddf = france[france.surface <= imax]
+    proddf = proddf[proddf.surface >= imin]
         
 
     centerLatLon = dict({'lat': 46, 'lon': 0});
-    fig = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe', size_max=10, center=centerLatLon, color="production_surface", size="production_surface",
+    fig = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe', size_max=15, center=centerLatLon, color="production_surface", size="surface",
                         projection="natural earth")
 
     fig.update_layout(transition_duration=500, geo = dict(projection_scale=5))
     return fig
+
 
 @app.callback(
         dash.dependencies.Output('graphFabriquants', 'figure'),
         dash.dependencies.Input('surface-slider_Fabriquants', 'value')
     )
 def update_figure(input_value):
-    proddf = france[france.surface <= input_value[1]]
-    proddf = proddf[proddf.surface >= input_value[0]]
+    imax= np.exp(input_value[1]);
+    imin= np.exp(input_value[0]);
+    proddf = france[france.surface <= imax]
+    proddf = proddf[proddf.surface >= imin]
         
 
     centerLatLon = dict({'lat': 46, 'lon': 0});
-    fig = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe', size_max=10, center=centerLatLon, color="production_surface", size="production_surface",
+    fig = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe', size_max=15, center=centerLatLon, color="production_surface", size="production_surface",
                         projection="natural earth")
 
     fig.update_layout(transition_duration=500, geo = dict(projection_scale=5))
@@ -265,8 +261,10 @@ def update_figure(input_value):
     dash.dependencies.Input('surface-slider', 'value')
 )
 def update_figure(input_value):
-    proddf = france[france.surface <= input_value[1]]
-    proddf = proddf[proddf.surface >= input_value[0]]
+    imax= np.exp(input_value[1]);
+    imin= np.exp(input_value[0]);
+    proddf = france[france.surface <= imax]
+    proddf = proddf[proddf.surface >= imin]
 
     centerLatLon = dict({'lat': 35, 'lon': -5});
     fig2 = px.scatter(proddf, x="pente", y="orientation",
@@ -281,27 +279,27 @@ def update_figure(input_value):
 
 
 
-    @app.callback(
-    dash.dependencies.Output(component_id='histogram_brand', component_property='figure'), # (1)
-    [dash.dependencies.Input(component_id='year_dropdown_historgram_brand', component_property='value')] # (2)
-    )
-    def update_figure(input_value): # (3)
-        if input_value == None:
-            fig3 = px.histogram(france, x='panneaux_marque',y='nb_panneaux')
-            fig3.layout.xaxis.title="marque du panneau"
-            fig3.layout.yaxis.title="nombres de panneaux installés"
-            fig3.update_xaxes(categoryorder="total descending")
-            return fig3
-        
-        constructeur_an_df = france[france.an_installation == input_value]
-
-        fig3 = px.histogram(constructeur_an_df, x='panneaux_marque',y='nb_panneaux')
+@app.callback(
+dash.dependencies.Output(component_id='histogram_brand', component_property='figure'), # (1)
+[dash.dependencies.Input(component_id='year_dropdown_historgram_brand', component_property='value')] # (2)
+)
+def update_figure(input_value): # (3)
+    if input_value == None:
+        fig3 = px.histogram(france, x='panneaux_marque',y='nb_panneaux')
         fig3.layout.xaxis.title="marque du panneau"
         fig3.layout.yaxis.title="nombres de panneaux installés"
         fig3.update_xaxes(categoryorder="total descending")
-
         return fig3
+        
+    constructeur_an_df = france[france.an_installation == input_value]
+
+    fig3 = px.histogram(constructeur_an_df, x='panneaux_marque',y='nb_panneaux')
+    fig3.layout.xaxis.title="marque du panneau"
+    fig3.layout.yaxis.title="nombres de panneaux installés"
+    fig3.update_xaxes(categoryorder="total descending")
+
+    return fig3
 
 
 
-    app.run_server(debug=False) # (8)
+app.run_server(debug=False) # (8)

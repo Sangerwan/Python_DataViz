@@ -13,7 +13,12 @@
 	display: flex;
 	flex-direction: column;
 }
-.graph2 {
+.graphSurfaceProduction {
+	display: flex;
+	flex-direction: row;
+}
+
+.graphConstructeur {
 	display: flex;
 	flex-direction: row;
 }
