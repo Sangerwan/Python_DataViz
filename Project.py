@@ -10,21 +10,22 @@ import plotly_express as px
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import requests
+import zipfile
+import io
 
 #https://www.data.gouv.fr/fr/datasets/donnees-sur-les-installations-photovoltaique-en-france-et-quelques-pays-europeens/
 
 path = os.getcwd()
-####
-#Pas_dans la liste
-#Sud
-#production 0
-#orientation_optimum nan
-#pente optimum
-#postal_code_suffix
-#
-###
-print(path)
+
+
+data_url="https://www.data.gouv.fr/fr/datasets/r/12b8efc1-6c38-46ab-8cfa-6220970fa260"
+request = requests.get(data_url, stream=True)
+zip = zipfile.ZipFile(io.BytesIO(request.content))
+zip.extractall("./")
+
 df=pd.read_csv("./BDPV-opendata-installations/BDPV-opendata-installations.csv", sep=';')
+
 #Remove sud
 df['orientation']=df['orientation'].replace("Sud",0);# SUD=0
 df['orientation']=df['orientation'].replace("South",0);# SUD=0
@@ -35,61 +36,27 @@ df=df[df.panneaux_modele != 'Pas_dans_la_liste_panneaux']
 df=df[df.production_pvgis != 0]
 #remove 0 surface
 df=df[df.surface != 0]
-df=df[df.surface < 1000]
-df=df[df.production_pvgis < 50000 ]
-
-
-
-for col in df:
-    print(col)
-    print(df[col].unique())
-
-i= df.columns
-
-country= df['country']
 
 france=df.query("country == 'France'")
 
-
-
-production = france["production_pvgis"]
-surface = france["surface"]
-#france = france[france.surface!=8388607]
-
-
-#
-# Data
-#
-
-
-
-production_surface = zeros(len(production))
-for i in range(len(production)):
-    production_surface[i] = production.array[i]/surface.array[i];
+production_surface = zeros(len(france.production_pvgis))
+for i in range(len(france.production_pvgis)):
+    production_surface[i] = france.production_pvgis.array[i]/france.surface.array[i];
 
 france.loc[:,'production_surface'] = production_surface;
 
-
-surfaces= surface.unique()
-
-sorted_surface=np.sort(surfaces)
-
-france = france.sort_values(by=['surface'])
-
-#
-
-
-
-
 if __name__ == '__main__':
 
-    app = dash.Dash(__name__) # (3)
+    app = dash.Dash(__name__)
 
+    unique_par_an=france.groupby('an_installation').size()
     
-    fig1 = px.scatter(france, x="surface", y="production_pvgis",
-                        color="orientation",
-                        size="nb_panneaux",
-                        hover_name="nb_panneaux") # (4)
+    fig1 = px.histogram(france, x='an_installation',y='nb_panneaux', labels={'an_installation' : 'année d\'installation','nb_panneaux' : 'nombres de panneaux'})
+
+    fig3 = px.histogram(france, x='panneaux_marque',y='nb_panneaux')
+    fig3.layout.xaxis.title="marque du panneau"
+    fig3.layout.yaxis.title="nombres de panneaux installés"
+    fig3.update_xaxes(categoryorder="total descending")
 
     fig2 = px.scatter(france, x="pente", y="orientation",
                         color="production_surface",
@@ -104,25 +71,55 @@ if __name__ == '__main__':
 
                             html.H1( children=f'Production des panneaux solaires en fonction de la surface',
                                         style={'textAlign': 'center', 'color': '#7FDBFF'}), # (5)
-
+                            ##
                             html.Div(dcc.Input(id='input-on-submit', type='text')),
                                 html.Button('Submit', id='submit-val', n_clicks=0),
                                 html.Div(className="app-header", id='container-button-basic', children='Enter a value and press submit'),
-
+                            ##
                             
                             dcc.Graph(
-                                id='graph1',
-                                figure=fig1,
+                                    id='histogram1',
+                                    figure=fig1,
+                                    
                                 
 
-                            ), # (6)
+                                ),
 
-                            html.Label('surface'),
+                            html.Div([
+
+                                dcc.Graph(
+                                    id='histogram_brand',
+                                    figure=fig3,
+                                
+
+                                ),
+
+                                html.Div([
+                                        
+                                    #dcc.Dropdown(
+                                    #    options=[{'label': i, 'value': i} for i in france.columns],
+                                        
+                                    #),
+                                    #dcc.RadioItems(
+                                    #    id='filter_type_historgram_brand',
+                                    #    options=[{'label': i, 'value': i} for i in ['Linear', 'Log']],
+                                    #    value='Linear',
+                                    #    #labelStyle={'display': 'inline-block'},
+                                    #),
                                     dcc.Dropdown(
-                                        id="surface_dropdown_graph1",
-                                        options=[{'label': i, 'value': i} for i in sorted_surface],
-                                        value=sorted_surface[0]
-                            ),
+                                        id="year_dropdown_historgram_brand",
+                                        options=[{'label': i, 'value': i} for i in sort(france.an_installation.unique())],
+                                        placeholder="Select a year",
+                                        
+
+                                    ),
+                                ]),
+
+
+
+                          ]),
+
+                            
 
                             
                                 
@@ -201,74 +198,26 @@ if __name__ == '__main__':
 
 
     @app.callback(
-    dash.dependencies.Output(component_id='graph1', component_property='figure'), # (1)
-    [dash.dependencies.Input(component_id='surface_dropdown_graph1', component_property='value')] # (2)
+    dash.dependencies.Output(component_id='histogram_brand', component_property='figure'), # (1)
+    [dash.dependencies.Input(component_id='year_dropdown_historgram_brand', component_property='value')] # (2)
     )
     def update_figure(input_value): # (3)
+        if input_value == None:
+            fig3 = px.histogram(france, x='panneaux_marque',y='nb_panneaux')
+            fig3.layout.xaxis.title="marque du panneau"
+            fig3.layout.yaxis.title="nombres de panneaux installés"
+            fig3.update_xaxes(categoryorder="total descending")
+            return fig3
         
-        index=np.where(sorted_surface == input_value)[0]
-        print(index)
-        print(index[0])
-        print(index[0]-5)
-        a = range(index[0]-5,index[0])
+        constructeur_an_df = france[france.an_installation == input_value]
 
-        print(a)
-        x_range_min=min(x for x in range(index[0]-50,index[0]+1) if x>=0)
-        x_range_max=max(x for x in range(index[0],index[0]+50) if x<sorted_surface.size)
+        fig3 = px.histogram(constructeur_an_df, x='panneaux_marque',y='nb_panneaux')
+        fig3.layout.xaxis.title="marque du panneau"
+        fig3.layout.yaxis.title="nombres de panneaux installés"
+        fig3.update_xaxes(categoryorder="total descending")
 
-        surface_min=min(x for x in france['surface'][x_range_min:x_range_max])
-        surface_max=max(x for x in france['surface'][x_range_min:x_range_max])
+        return fig3
 
-        nb_panneau_min=min(x for x in france['nb_panneaux'][x_range_min:x_range_max])
-        nb_panneau_max=max(x for x in france['nb_panneaux'][x_range_min:x_range_max])
 
-        y_range_min=min(x for x in france['production_pvgis'][x_range_min:x_range_max])
-        y_range_max=max(x for x in france['production_pvgis'][x_range_min:x_range_max])
-
-        print('surface')
-        print(x_range_min)
-        print(x_range_max)
-        print(france['surface'][x_range_min:x_range_max])
-
-        print('prod')
-        print(y_range_min)
-        print(y_range_max)
-        print(france['production_pvgis'][x_range_min:x_range_max])
-
-        print('nb_panneaux')
-        print(nb_panneau_min)
-        print(nb_panneau_max)
-        print(france['nb_panneaux'][x_range_min:x_range_max])
-
-        print('======france======')
-        print(france)
-        print('======filter======')
-        print(france[france.surface.isin(range(x_range_min,x_range_max))])
-        print(france[france.surface.isin(range(x_range_min,x_range_max))].surface.unique())
-
-        return px.scatter(france[france.surface.isin(range(x_range_min,x_range_max))],
-                         x='surface',
-                         y='production_pvgis',
-                        color='orientation',
-                        size='nb_panneaux',
-                       hover_name='nb_panneaux',
-                       labels={'x' : 'surface','y' : 'production_pvgis','color' : 'orientation','size' : 'nb_panneaux','hover_name' : 'nb_panneaux'},)
-
-        
-    def filter(data_frame, x_axis, y_axis, centered_x_value=None, x_axis_range=None, color=None, size=None, hover_name=None, label=None):
-        if centered_x_value is not None:
-            index=np.where(data_frame[x_axis] == input_value)[0]
-            if x_axis_range is not None:
-                min_index=min(x for x in range(index[0]-x_axis_range,index[0]+1) if x>=0)
-                max_index=max(x for x in range(index[0],index[0]+x_axis_range) if x<data_frame[x_axis].size)
-                min_value=min(value for value in data_frame[y_axis][min_index:max_index])
-                max_value=max(value for value in data_frame[y_axis][min_index:max_index])
-                return df.scatter(data_frame,x=x_axis,y=y_axis,color=color,size=size,hover_name=hover_name,label=label)
-
-        return df.scatter(data_frame,x=x_axis,y=y_axis,color=color,size=size,hover_name=hover_name,label=label)
-
-    #
-    # RUN APP234
-    #1
 
     app.run_server(debug=False) # (8)
