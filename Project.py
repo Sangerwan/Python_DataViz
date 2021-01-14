@@ -64,7 +64,7 @@ if __name__ == '__main__':
     centerLatLon = dict({'lat': 35, 'lon': -5});
     fig = px.scatter_geo(france, lon="lon",lat="lat",scope='europe',size_max=15, center=centerLatLon, color="production_surface", size="surface",
                             projection="natural earth")
-    mapConstructeurs = px.scatter_geo(france, lon="lon",lat="lat",scope='europe',size_max=15, center=centerLatLon, color="panneaux_marque", size="surface",
+    mapConstructeurs = px.scatter_geo(france, lon="lon",lat="lat",scope='europe',size_max=15, center=centerLatLon, color="panneaux_marque",
                             projection="natural earth")
     
 
@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
     app.layout = html.Div(children= ([
 
-                            html.H1( children=f'Production des panneaux solaires en fonction de la surface',
+                            html.H1( children=f'Analyse de la production photovoltaïque en France',
                                         style={'textAlign': 'center', 'color': '#7FDBFF'}), 
                             ##
                             
@@ -168,38 +168,24 @@ if __name__ == '__main__':
 
                                        ),
                                    ),
-                                   html.Div(className= "chexbox", children=
-                                       dcc.Checklist(     
-                                            id='chexboxFabriquants',
-                                            options=labelsValues,
-                                            value=[],
-                                        ),
-                                   ),
-                                   dcc.Graph(
-                                        id='mapFabriquants',
-                                        figure=mapConstructeurs,
-                                   ),
+                                   
+                                   html.Div(children=
+                                       dcc.Graph(
+                                            id='mapFabriquants',
+                                            figure=mapConstructeurs,
+                                       ),
+                                   )
                                    
                                
                             ]),
                        
-                          dcc.RangeSlider(
-                                        id='surface-sliderFabriquants',
-                                        min=AnneeInstallUnique.min(),
-                                        max=AnneeInstallUnique.max(),
-                                       
-                                        value=[2000,2005],
-                                        step=0.5,
-                                         marks={
-                                            0 : '0 m²',
-                                            1 : '10 m²',
-                                            2 : '100 m²',
-                                            3 : '1000 m²',
-                                            4 : '1 Hectares',
-                                            5 : '10 Hectares',
-                                            6 : '100 Hectares',
-                                        },
-                           ),  
+                          html.Div(className= "chexbox", children=
+                                dcc.Checklist(     
+                                    id='chexboxFabriquants',
+                                    options=labelsValues,
+                                    value=[],
+                                ),
+                            ),
 
                                 
                             
@@ -213,6 +199,9 @@ if __name__ == '__main__':
                 ]))
 
 
+#-----------------------------------
+#RANGESLIDER => MAP FABRIQUANTS
+#-----------------------------------
 @app.callback(
     dash.dependencies.Output('map', 'figure'),
     dash.dependencies.Input('surface-slider', 'value')
@@ -232,19 +221,27 @@ def update_figure(input_value):
     return fig
 
 
+#-----------------------------------
+#CHECKBOX => MAP FABRIQUANTS
+#-----------------------------------
 @app.callback(
         dash.dependencies.Output('mapFabriquants', 'figure'),
-        dash.dependencies.Input('surface-sliderFabriquants', 'value')
+        dash.dependencies.Input('chexboxFabriquants', 'value')
     )
 def update_figure(input_value):
-    imax= np.exp(input_value[1]);
-    imin= np.exp(input_value[0]);
-    proddf = france[france.surface <= imax]
-    proddf = proddf[proddf.surface >= imin]
+    proddf = france
+    yearData =france
+
+    proddf = france.where(france.an_installation.isin(input_value), proddf, False, None, None, 'raise', True)
+
+    #for year in input_value: 
+        #proddf=pd.concat([proddf,yearData], ignore_index=True)
+    #yearData = france[france.an_installation. == inputvalue]
+
         
 
     centerLatLon = dict({'lat': 46, 'lon': 0});
-    mapConstructeurs = px.scatter_geo(france, lon="lon",lat="lat",scope='europe',size_max=15, center=centerLatLon, color="panneaux_marque", size="surface",
+    mapConstructeurs = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe',size_max=15, center=centerLatLon, color="panneaux_marque", 
                             projection="natural earth")
     
 
@@ -252,25 +249,30 @@ def update_figure(input_value):
     return mapConstructeurs
 
 
+
+#-----------------------------------
+#CHECKBOX => GRAPH FABRIQUANTS
+#-----------------------------------
 @app.callback(
         dash.dependencies.Output('graphFabriquants', 'figure'),
         dash.dependencies.Input('surface-slider_Fabriquants', 'value')
     )
 def update_figure(input_value):
-    imax= np.exp(input_value[1]);
-    imin= np.exp(input_value[0]);
-    proddf = france[france.surface <= imax]
-    proddf = proddf[proddf.surface >= imin]
+   
         
 
     centerLatLon = dict({'lat': 46, 'lon': 0});
-    fig = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe', size_max=15, center=centerLatLon, color="production_surface", size="production_surface",
+    fig = px.scatter_geo(france, lon="lon",lat="lat",scope='europe', size_max=15, center=centerLatLon, color="production_surface", size="production_surface",
                         projection="natural earth")
 
     fig.update_layout(transition_duration=500, geo = dict(projection_scale=5))
     return fig
 
 
+
+#-----------------------------------
+#YEAR DROPDOWN => HISTOGRAM
+#-----------------------------------
 @app.callback(
     dash.dependencies.Output('graph3', 'figure'),
     dash.dependencies.Input('surface-slider', 'value')
@@ -292,8 +294,9 @@ def update_figure(input_value):
 
 
 
-
-
+#-----------------------------------
+#YEAR DROPDOWN => HISTOGRAM
+#-----------------------------------
 @app.callback(
 dash.dependencies.Output(component_id='histogram_brand', component_property='figure'), # (1)
 [dash.dependencies.Input(component_id='year_dropdown_historgram_brand', component_property='value')] # (2)
