@@ -64,17 +64,22 @@ if __name__ == '__main__':
     centerLatLon = dict({'lat': 35, 'lon': -5});
     fig = px.scatter_geo(france, lon="lon",lat="lat",scope='europe',size_max=15, center=centerLatLon, color="production_surface", size="surface",
                             projection="natural earth")
+    mapConstructeurs = px.scatter_geo(france, lon="lon",lat="lat",scope='europe',size_max=15, center=centerLatLon, color="panneaux_marque", size="surface",
+                            projection="natural earth")
     
+
+    labelsValues= []
+    AnneeInstallUnique = np.sort(france.an_installation.unique())
+    for i in range(len(AnneeInstallUnique)):
+        labelsValues.append(dict({'label' : AnneeInstallUnique[i], 'value': AnneeInstallUnique[i]}))
+                                    
 
     app.layout = html.Div(children= ([
 
                             html.H1( children=f'Production des panneaux solaires en fonction de la surface',
-                                        style={'textAlign': 'center', 'color': '#7FDBFF'}), # (5)
+                                        style={'textAlign': 'center', 'color': '#7FDBFF'}), 
                             ##
-                            html.Div(dcc.Input(id='input-on-submit', type='text')),
-                                html.Button('Submit', id='submit-val', n_clicks=0),
-                                html.Div(className="app-header", id='container-button-basic', children='Enter a value and press submit'),
-                            ##
+                            
                             
                             dcc.Graph(
                                     id='histogram1',
@@ -144,7 +149,7 @@ if __name__ == '__main__':
                                         value=[4,5],
                                         step=0.5,
                                          marks={
-                                            0  : '0 m²',
+                                            0 : '0 m²',
                                             1 : '10 m²',
                                             2 : '100 m²',
                                             3 : '1000 m²',
@@ -156,28 +161,37 @@ if __name__ == '__main__':
                           
 
                            html.Div(className= "graphConstructeur", children=    [ 
-                                    dcc.Graph(
-                                    id='graphFabriquants',
-                                    figure=fig2,
+                                   html.Div(children=
+                                       dcc.Graph(
+                                            id='graphFabriquants',
+                                            figure=fig,
 
+                                       ),
+                                   ),
+                                   html.Div(className= "chexbox", children=
+                                       dcc.Checklist(     
+                                            id='chexboxFabriquants',
+                                            options=labelsValues,
+                                            value=[],
+                                        ),
                                    ),
                                    dcc.Graph(
                                         id='mapFabriquants',
-                                        figure=fig
+                                        figure=mapConstructeurs,
                                    ),
                                    
                                
                             ]),
                        
                           dcc.RangeSlider(
-                                        id='surface-slider2',
-                                        min=np.log(france['surface'].min()),
-                                        max=6,
+                                        id='surface-sliderFabriquants',
+                                        min=AnneeInstallUnique.min(),
+                                        max=AnneeInstallUnique.max(),
                                        
-                                        value=[4,5],
+                                        value=[2000,2005],
                                         step=0.5,
                                          marks={
-                                            0  : '0 m²',
+                                            0 : '0 m²',
                                             1 : '10 m²',
                                             2 : '100 m²',
                                             3 : '1000 m²',
@@ -220,7 +234,7 @@ def update_figure(input_value):
 
 @app.callback(
         dash.dependencies.Output('mapFabriquants', 'figure'),
-        dash.dependencies.Input('surface-slider_Fabriquants', 'value')
+        dash.dependencies.Input('surface-sliderFabriquants', 'value')
     )
 def update_figure(input_value):
     imax= np.exp(input_value[1]);
@@ -230,11 +244,12 @@ def update_figure(input_value):
         
 
     centerLatLon = dict({'lat': 46, 'lon': 0});
-    fig = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe', size_max=15, center=centerLatLon, color="production_surface", size="surface",
-                        projection="natural earth")
+    mapConstructeurs = px.scatter_geo(france, lon="lon",lat="lat",scope='europe',size_max=15, center=centerLatLon, color="panneaux_marque", size="surface",
+                            projection="natural earth")
+    
 
-    fig.update_layout(transition_duration=500, geo = dict(projection_scale=5))
-    return fig
+    mapConstructeurs.update_layout(transition_duration=500, geo = dict(projection_scale=5))
+    return mapConstructeurs
 
 
 @app.callback(
