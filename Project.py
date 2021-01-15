@@ -71,7 +71,9 @@ if __name__ == '__main__':
     labelsValues= []
     AnneeInstallUnique = np.sort(france.an_installation.unique())
     for i in range(len(AnneeInstallUnique)):
-        labelsValues.append(dict({'label' : AnneeInstallUnique[i], 'value': AnneeInstallUnique[i]}))
+        if (AnneeInstallUnique[i] != 1993):
+            labelsValues.append(dict({'label' : AnneeInstallUnique[i], 'value': AnneeInstallUnique[i]}))
+    
                                     
 
     app.layout = html.Div(children= ([
@@ -229,17 +231,19 @@ def update_figure(input_value):
         dash.dependencies.Input('chexboxFabriquants', 'value')
     )
 def update_figure(input_value):
-    proddf = france
-    yearData =france
-
-    proddf = france.where(france.an_installation.isin(input_value), proddf, False, None, None, 'raise', True)
-
-    #for year in input_value: 
-        #proddf=pd.concat([proddf,yearData], ignore_index=True)
-    #yearData = france[france.an_installation. == inputvalue]
-
-        
-
+    
+    #proddf = france.query(france.an_installation.isin(input_value))
+    #proddf = france.loc[:, input_value[input_value].index]
+    proddf=france[france.an_installation == 67]
+    yearData =france[france.an_installation == 66]
+    if (input_value!=[]):        
+        for year in input_value: 
+            yearData = france[france.an_installation == year]
+            print(yearData)
+            proddf=pd.concat([proddf,yearData], ignore_index=True)
+    else :
+        proddf=france
+       
     centerLatLon = dict({'lat': 46, 'lon': 0});
     mapConstructeurs = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe',size_max=15, center=centerLatLon, color="panneaux_marque", 
                             projection="natural earth")
