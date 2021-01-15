@@ -15,9 +15,6 @@ import io
 
 #https://www.data.gouv.fr/fr/datasets/donnees-sur-les-installations-photovoltaique-en-france-et-quelques-pays-europeens/
 
-path = os.getcwd()
-
-
 data_url="https://www.data.gouv.fr/fr/datasets/r/12b8efc1-6c38-46ab-8cfa-6220970fa260"
 request = requests.get(data_url, stream=True)
 zip = zipfile.ZipFile(io.BytesIO(request.content))
@@ -50,7 +47,7 @@ if __name__ == '__main__':
 
     unique_par_an=france.groupby('an_installation').size()
     
-    fig1 = px.histogram(france, x='an_installation',y='nb_panneaux', labels={'an_installation' : 'année d\'installation','nb_panneaux' : 'nombres de panneaux'})
+    fig1 = px.histogram(france, x='an_installation',y='nb_panneaux')
 
     fig3 = px.histogram(france, x='panneaux_marque',y='nb_panneaux')
     fig3.layout.xaxis.title="marque du panneau"
@@ -76,22 +73,47 @@ if __name__ == '__main__':
                                 html.Div(className="app-header", id='container-button-basic', children='Enter a value and press submit'),
                             ##
                             
-                            dcc.Graph(
-                                    id='histogram1',
-                                    figure=fig1,
+                            html.Div([
+                                    dcc.Graph(
+                                        id='histogram',
+                                        figure=fig1,
                                     
                                 
 
-                                ),
+                                    ),
+
+                                    html.Div([
+                                        html.Div(
+                                         dcc.Dropdown(
+                                            id="year_dropdown_historgram_brand1",
+                                            options=[{'label': i, 'value': i} for i in np.sort(france.an_installation.unique())],
+                                            placeholder="Select a year",
+                                        
+
+                                            ),style={'width': '49%', 'display': 'inline-block'}
+                                         ),
+                                        html.Div(
+                                         dcc.Dropdown(
+                                            id="year_dropdown_historgram_brand2",
+                                            options=[{'label': i, 'value': i} for i in np.sort(france.an_installation.unique())],
+                                            placeholder="Select a year",
+                                        
+
+                                            ),style={'width': '49%', 'display': 'inline-block'}
+                                         ),
+                                   
+                                ]),
+                                    ]),
+                            
 
                             html.Div([
 
-                                dcc.Graph(
-                                    id='histogram_brand',
-                                    figure=fig3,
+                                    dcc.Graph(
+                                        id='histogram_brand',
+                                        figure=fig3,
                                 
 
-                                ),
+                                    ),
 
                                 html.Div([
                                         
