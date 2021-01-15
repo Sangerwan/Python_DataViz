@@ -2,6 +2,8 @@
 	height: 60px;
 	line-height: 60px;
 	border-bottom: thin lightgrey solid;
+	display: flex;
+	flex-direction: column;
 }
 
 	.app-header .app-header--title {
