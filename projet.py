@@ -35,7 +35,7 @@ df = df[df.panneaux_modele != 'Pas_dans_la_liste_panneaux']
 df = df[df.production_pvgis != 0]
 #remove 0 surface
 df = df[df.surface != 0]
-
+df=df.fillna(0)
 france = df.query("country == 'France'")
 
 for i in range(len(france.orientation)):
@@ -46,7 +46,10 @@ for i in range(len(france.production_pvgis)):
     production_surface[i] = france.production_pvgis.array[i] / france.surface.array[i]
 france.insert(6,'production_surface',production_surface,True)
 
+france['orientation'] = france.orientation.astype(float)
+
 Nom_colonnes = {
+    'id': 'id',
     'mois_installation': 'mois d\'installation',
     'an_installation': 'année d\'installation',
     'nb_panneaux': 'nombre de panneaux',
@@ -67,6 +70,7 @@ Nom_colonnes = {
     'lon': 'longitude',
     }
 
+print(france.pente_optimum)
 if __name__ == '__main__':
 
     app = dash.Dash(__name__)
@@ -201,6 +205,29 @@ if __name__ == '__main__':
                             ],
                         placeholder='Select a year',
                         value=2006),
+                    ]),
+                ]),
+
+            html.Div([
+                dcc.Graph(
+                    id='scatter_pente_orientation',
+                    ),
+
+                html.Div(
+                    id='scatter_pente_orientation_title',
+                    style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
+                    ),
+
+                html.Div([
+                    dcc.Dropdown(
+                        id='scatter_pente_orientation_dropdown',
+                        options=[
+                            {'label': 'pente', 'value': 'pente'},
+                            {'label': 'orientation', 'value': 'orientation'},
+                            ],
+                        clearable=False,
+                        value='pente'
+                        ),
                     ]),
                 ]),
 
@@ -500,6 +527,47 @@ def update_histogram(input_value):
 
     return histogram
 
+@app.callback(
+    dash.dependencies.Output('scatter_pente_orientation_title', 'children'),
+    [dash.dependencies.Input('scatter_pente_orientation_dropdown', 'value')]
+    )
+def update_scatter_pente_title(dropdown_value):
+    """
+    Retourne le titre du graphique
+    Args:
+        dropdown_value: valeur du menu déroulant
+    """
+    if dropdown_value == 'pente':
+        return 'Comparaison entre la pente optimum et la pente actuelle'
 
+    if dropdown_value == 'orientation':
+        return 'Comparaison entre la orientation optimum et la orientation actuelle'
+
+    print('type error')
+    return 'type error'
+
+@app.callback(
+    dash.dependencies.Output('scatter_pente_orientation', 'figure'),
+    [dash.dependencies.Input('scatter_pente_orientation_dropdown', 'value')]
+    )
+def update_scatter_pente(input_value):
+    """
+    Retourne un nuage de points en fonction de la valeur du menu déroulant
+
+    Args:
+        input_value: pente ou orientation
+    """
+    if input_value == 'pente':
+        figure_pente = px.scatter(france, x='id',y=['pente','pente_optimum'])
+        figure_pente.layout.yaxis.title = Nom_colonnes['pente']
+        return figure_pente
+
+    if input_value == 'orientation':
+        orientation_pente = px.scatter(france, x='id',y=['orientation','orientation_optimum'])
+        orientation_pente.layout.yaxis.title = Nom_colonnes['orientation']
+        return orientation_pente
+
+    print('type error')
+    return 'type error'
 
 app.run_server(debug=False)
