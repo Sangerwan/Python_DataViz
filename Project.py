@@ -157,6 +157,9 @@ if __name__ == '__main__':
                                     ],style={'width': '49%', 'display': 'inline-block'}
                                     ),
                                 ]),
+                                html.Div([
+                                    html.Button('Inverser les axes', id='invert_axes')
+                                    ]),
                             ]),
                             
 
@@ -362,6 +365,18 @@ def update_figure(input_value):
 def update_histogram_title(x_axis, y_axis):
     return '"' +Nom_colonnes[y_axis]+'"' + ' en fontcion de ' + '"'+Nom_colonnes[x_axis]+'"'
 
+
+@app.callback(
+    dash.dependencies.Output(component_id='x_dropdown_figure1', component_property='value'),
+    dash.dependencies.Output(component_id='y_dropdown_figure1', component_property='value'),
+    [ 
+    dash.dependencies.Input(component_id='invert_axes', component_property='n_clicks'),
+    dash.dependencies.State(component_id='x_dropdown_figure1', component_property='value'),
+    dash.dependencies.State(component_id='y_dropdown_figure1', component_property='value')
+    ]
+    )
+def update_histogram_title(input, x_axis, y_axis):
+    return y_axis, x_axis
 
 #-----------------------------------
 #YEAR DROPDOWN => HISTOGRAM
