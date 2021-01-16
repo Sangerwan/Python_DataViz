@@ -85,7 +85,6 @@ if __name__ == '__main__':
     #fig3.layout.yaxis.title = "nombre de panneaux installés"
     #fig3.update_xaxes(categoryorder="total descending")
 
-    figPolar = px.scatter_polar(france, r="nb_panneaux",log_r=True, theta="orientation")
 
     #fig_puissance = px.violin(france, y=france.puissance_crete,x="an_installation",log_y=True,
     #                            log_x=False, color="an_installation", box=True,
@@ -95,7 +94,6 @@ if __name__ == '__main__':
     #                    color="production_surface",
     #                    hover_name="nb_panneaux")
 
-    center_lat_lon = dict({'lat': 46, 'lon': 2})
     #fig = px.scatter_geo(france,lon="lon",lat="lat",scope='europe',size_max=15,center=center_lat_lon,
     #                        color="production_surface", size="surface",projection="natural earth")
 
@@ -115,6 +113,9 @@ if __name__ == '__main__':
     #map_constructeurs.update_layout(transition_duration=500, geo = dict(projection_scale=5))
     #fig.update_layout(transition_duration=500, geo = dict(projection_scale=5))
 
+    figPolar = px.scatter_polar(france, r="nb_panneaux",log_r=True, theta="orientation")
+    center_lat_lon = dict({'lat': 46, 'lon': 2})
+
     app.layout = html.Div(
         children=([
 
@@ -124,19 +125,19 @@ if __name__ == '__main__':
                 ),
 
             html.Div([
-                dcc.Dropdown(id='figure1_type',
-                options=[
-                    {'label': 'Histogramme', 'value': 'Histogramme'},
-                    {'label': 'Nuage de points', 'value': 'Nuage'}
-                    ],
-                value='Histogramme',
-                clearable=False,),
+                dcc.Dropdown(
+                    id='figure1_type',
+                    options=[
+                        {'label': 'Histogramme', 'value': 'Histogramme'},
+                        {'label': 'Nuage de points', 'value': 'Nuage'}
+                        ],
+                    value='Histogramme',
+                    clearable=False,),
                 ]),
 
             html.Div([
                 dcc.Graph(
                     id='figure1',
-                    #figure=fig1,
                     ),
 
                 html.Div([
@@ -160,29 +161,31 @@ if __name__ == '__main__':
                         ),
 
                     html.Div([
-                        dcc.Dropdown(id='y_dropdown_figure1',
+                        dcc.Dropdown(
+                            id='y_dropdown_figure1',
                             options=[
                                 {'label': v, 'value': k} for k,v in Nom_colonnes.items()
                                 ],
                             value="an_installation",
                             clearable=False,
-                            placeholder='',)
+                            placeholder='',
+                            )
                         ],
                         style={'width': '49%', 'display': 'inline-block'}
                         ),
-
                     ]),
 
                 html.Div([
-                    html.Button('Inverser les axes', id='invert_axes')])
-
+                    html.Button(
+                        'Inverser les axes',
+                        id='invert_axes')
+                    ])
                 ]),
 
 
             html.Div([
                 dcc.Graph(
                     id='histogram_brand',
-                    #figure=fig3,
                     ),
 
                 html.Div(
