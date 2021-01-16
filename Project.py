@@ -164,14 +164,16 @@ if __name__ == '__main__':
                             
 
                             html.Div([
-
+                                
                                     dcc.Graph(
                                         id='histogram_brand',
                                         figure=fig3,
                                 
 
                                     ),
-
+                                    html.Div('Nombre de panneaux installés par année',
+                                             style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
+                                             ),
                                 html.Div([
                                         
 
@@ -363,7 +365,7 @@ def update_figure(input_value):
     dash.dependencies.Input(component_id='y_dropdown_figure1', component_property='value')]
     )
 def update_histogram_title(x_axis, y_axis):
-    return '"' +Nom_colonnes[y_axis]+'"' + ' en fontcion de ' + '"'+Nom_colonnes[x_axis]+'"'
+    return '"' +Nom_colonnes[y_axis]+'"' + ' en fonction de ' + '"'+Nom_colonnes[x_axis]+'"'
 
 
 @app.callback(
@@ -399,17 +401,22 @@ def update_figure(input_value):
     fig2.update_coloraxes(showscale=False)
     return fig2
 
-#-----------------------------------
-#YEAR DROPDOWN => HISTOGRAM
-#-----------------------------------
+
 @app.callback(
-dash.dependencies.Output(component_id='figure1', component_property='figure'),
-[dash.dependencies.Input(component_id='figure1_type', component_property='value'),
-dash.dependencies.Input(component_id='x_dropdown_figure1', component_property='value'),
-dash.dependencies.Input(component_id='y_dropdown_figure1', component_property='value')]
+    dash.dependencies.Output(component_id='figure1', component_property='figure'),
+    [dash.dependencies.Input(component_id='figure1_type', component_property='value'),
+    dash.dependencies.Input(component_id='x_dropdown_figure1', component_property='value'),
+    dash.dependencies.Input(component_id='y_dropdown_figure1', component_property='value')]
 )
 def update_figure(type, x_axis, y_axis):
-    
+    """
+    Retourne un graphique avec les axes selectionnés.
+
+    Args:
+        type: le type du graphique (nuage de points ou histogramme)
+        x_axis: valeur de l'abscisse
+        y_axis: valeur de l'ordonnée
+    """
     if type == 'Nuage':
         nuage = px.scatter(france, x=x_axis,y=y_axis)
         nuage.layout.xaxis.title=Nom_colonnes[x_axis]
