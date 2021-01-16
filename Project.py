@@ -44,6 +44,27 @@ for i in range(len(france.production_pvgis)):
 
 france.insert(6,'production_surface',production_surface,True);
 
+Nom_colonnes= {
+    'mois_installation': 'mois d\'installation',
+    'an_installation': 'année d\'installation',
+    'nb_panneaux': 'nombre de panneaux',
+    'panneaux_marque': 'marque du panneau',
+    'panneaux_modele': 'modèle du panneau',
+    'nb_onduleur': 'nombre d\'onduleurs',
+    'onduleur_marque': 'marque de l\'onduleur',
+    'onduleur_modele': 'modèle de l\'onduleur',
+    'puissance_crete': 'puissance crète (Wc)',
+    'surface': 'surface (m²)',
+    'pente': 'pente (°)',
+    'pente_optimum': 'pente optimum (°)',
+    'orientation' : 'orientation par rapport au Sud',
+    'orientation_optimum': 'orientation optimum par rapport au Sud',
+    'installateur': 'installateur',
+    'production_pvgis': 'production annuelle (kWh)',
+    'lat': 'latitude',
+    'lon': 'longitude',
+    }
+
 if __name__ == '__main__':
 
     app = dash.Dash(__name__)
@@ -54,7 +75,7 @@ if __name__ == '__main__':
 
     fig3 = px.histogram(france, x='panneaux_marque',y='nb_panneaux')
     fig3.layout.xaxis.title="marque du panneau"
-    fig3.layout.yaxis.title="nombres de panneaux installés"
+    fig3.layout.yaxis.title="nombre de panneaux installés"
     fig3.update_xaxes(categoryorder="total descending")
 
     figPolar = px.scatter_polar(france, r="nb_panneaux",log_r=True, theta="orientation")
@@ -64,7 +85,7 @@ if __name__ == '__main__':
 
     fig2 = px.scatter(france, x="pente", y="orientation",
                         color="production_surface",
-                        hover_name="nb_panneaux") # (4)
+                        hover_name="nb_panneaux") 
     
     centerLatLon = dict({'lat': 46, 'lon': 2});
     fig = px.scatter_geo(france, lon="lon",lat="lat",scope='europe',size_max=15, center=centerLatLon, color="production_surface", size="surface",
@@ -86,39 +107,57 @@ if __name__ == '__main__':
 
                             html.H1( children=f'Analyse de la production photovoltaïque en France',
                                         style={'textAlign': 'center', 'color': '#7FDBFF'}), 
-                            ##
-                            
                             html.Div([
-                                    dcc.Graph(
-                                        id='histogram',
-                                        figure=fig1,
-                                    
-                                
-
+                                            
+                                    dcc.Dropdown(
+                                        id='figure1_type',
+                                        options=[
+                                            {'label': 'Histogramme', 'value': 'Histogramme'}, 
+                                            {'label': 'Nuage de points', 'value': 'Nuage'}
+                                            ],
+                                        value='Histogramme',
+                                        clearable=False,
                                     ),
+                                                                           
+                                    
+                            ]),
+
+                            html.Div([
+                                    
+                                dcc.Graph(
+                                    id='figure1',
+                                    figure=fig1,
+                                ),
+
+                                html.Div([
+
+                                    html.Div(id='figure1_title',
+                                             style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
+                                             ),
+                                    html.Div([
+                                            dcc.Dropdown(
+                                                id='x_dropdown_figure1',
+                                                options=[{'label': v, 'value': k} for k,v in Nom_colonnes.items()],
+                                                value="an_installation",
+                                                clearable=False,
+                                                placeholder='',
+                                            ),                         
+                                    ], style={'width': '49%', 'display': 'inline-block'}),
 
                                     html.Div([
-                                        html.Div(
-                                         dcc.Dropdown(
-                                            id="year_dropdown_historgram_brand1",
-                                            options=[{'label': i, 'value': i} for i in np.sort(france.an_installation.unique())],
-                                            placeholder="Select a year",
                                         
-
-                                            ),style={'width': '49%', 'display': 'inline-block'}
-                                         ),
-                                        html.Div(
-                                         dcc.Dropdown(
-                                            id="year_dropdown_historgram_brand2",
-                                            options=[{'label': i, 'value': i} for i in np.sort(france.an_installation.unique())],
-                                            placeholder="Select a year",
+                                            dcc.Dropdown(
+                                                id='y_dropdown_figure1',
+                                                options=[{'label': v, 'value': k} for k,v in Nom_colonnes.items()],
+                                                value='nb_panneaux',
+                                                clearable=False,
+                                                placeholder='',
+                                            ),
                                         
-
-                                            ),style={'width': '49%', 'display': 'inline-block'}
-                                         ),
-                                   
+                                    ],style={'width': '49%', 'display': 'inline-block'}
+                                    ),
                                 ]),
-                                    ]),
+                            ]),
                             
 
                             html.Div([
@@ -132,20 +171,11 @@ if __name__ == '__main__':
 
                                 html.Div([
                                         
-                                    #dcc.Dropdown(
-                                    #    options=[{'label': i, 'value': i} for i in france.columns],
-                                        
-                                    #),
-                                    #dcc.RadioItems(
-                                    #    id='filter_type_historgram_brand',
-                                    #    options=[{'label': i, 'value': i} for i in ['Linear', 'Log']],
-                                    #    value='Linear',
-                                    #    #labelStyle={'display': 'inline-block'},
-                                    #),
+
                                     dcc.Dropdown(
-                                        id="year_dropdown_historgram_brand",
+                                        id='year_dropdown_historgram_brand',
                                         options=[{'label': i, 'value': i} for i in np.sort(france.an_installation.unique())],
-                                        placeholder="Select a year",
+                                        placeholder='Select a year',
                                         value=2006                    
                                     ),
                                 ]),
@@ -241,10 +271,10 @@ if __name__ == '__main__':
                                 Données utilisées : https://www.data.gouv.fr/fr/datasets/donnees-sur-les-installations-photovoltaique-en-france-et-quelques-pays-europeens/  
                                 '''),
                   html.Div(className="app-header",children=f'''Réalisé par Erwan Sangchanmahola et Olivier Troissant 
-                                Cadre d'étude : ESIEE Paris'''), # (7)
+                                Cadre d'étude : ESIEE Paris'''),
                            
-
-                ]))
+    ]))
+                
 
 
 #-----------------------------------
@@ -297,6 +327,9 @@ def update_figure(input_value):
 
 
 
+
+
+
 #-----------------------------------
 #CHECKBOX => GRAPH VIOLIN FABRIQUANTS
 #-----------------------------------
@@ -321,6 +354,13 @@ def update_figure(input_value):
     figPuissance.update_xaxes(type='category')
     return figPuissance
 
+@app.callback(
+    dash.dependencies.Output(component_id='figure1_title', component_property='children'),
+    [dash.dependencies.Input(component_id='x_dropdown_figure1', component_property='value'),
+    dash.dependencies.Input(component_id='y_dropdown_figure1', component_property='value')]
+    )
+def update_histogram_title(x_axis, y_axis):
+    return '"' +Nom_colonnes[y_axis]+'"' + ' en fontcion de ' + '"'+Nom_colonnes[x_axis]+'"'
 
 
 #-----------------------------------
@@ -344,20 +384,44 @@ def update_figure(input_value):
     fig2.update_coloraxes(showscale=False)
     return fig2
 
+#-----------------------------------
+#YEAR DROPDOWN => HISTOGRAM
+#-----------------------------------
+@app.callback(
+dash.dependencies.Output(component_id='figure1', component_property='figure'),
+[dash.dependencies.Input(component_id='figure1_type', component_property='value'),
+dash.dependencies.Input(component_id='x_dropdown_figure1', component_property='value'),
+dash.dependencies.Input(component_id='y_dropdown_figure1', component_property='value')]
+)
+def update_figure(type, x_axis, y_axis):
+    
+    if type == 'Nuage':
+        nuage = px.scatter(france, x=x_axis,y=y_axis)
+        nuage.layout.xaxis.title=Nom_colonnes[x_axis]
+        nuage.layout.yaxis.title=Nom_colonnes[y_axis]
+        return nuage
+    if type =='Histogramme':
+        histogram = px.histogram(france, x=x_axis,y=y_axis)
+        histogram.layout.xaxis.title=Nom_colonnes[x_axis]
+        histogram.layout.yaxis.title=Nom_colonnes[y_axis]
+        return histogram
+    else: 
+        print('type error')
+        return
 
 
 #-----------------------------------
 #YEAR DROPDOWN => HISTOGRAM
 #-----------------------------------
 @app.callback(
-dash.dependencies.Output(component_id='histogram_brand', component_property='figure'), # (1)
-[dash.dependencies.Input(component_id='year_dropdown_historgram_brand', component_property='value')] # (2)
+dash.dependencies.Output(component_id='histogram_brand', component_property='figure'),
+[dash.dependencies.Input(component_id='year_dropdown_historgram_brand', component_property='value')]
 )
-def update_figure(input_value): # (3)
+def update_figure(input_value):
     if input_value == None:
         fig3 = px.histogram(france, x='panneaux_marque',y='nb_panneaux')
         fig3.layout.xaxis.title="marque du panneau"
-        fig3.layout.yaxis.title="nombres de panneaux installés"
+        fig3.layout.yaxis.title="nombre de panneaux installés"
         fig3.update_xaxes(categoryorder="total descending")
         return fig3
         
@@ -365,11 +429,11 @@ def update_figure(input_value): # (3)
 
     fig3 = px.histogram(constructeur_an_df, x='panneaux_marque',y='nb_panneaux')
     fig3.layout.xaxis.title="marque du panneau"
-    fig3.layout.yaxis.title="nombres de panneaux installés"
+    fig3.layout.yaxis.title="nombre de panneaux installés"
     fig3.update_xaxes(categoryorder="total descending")
 
     return fig3
 
 
 
-app.run_server(debug=False) # (8)
+app.run_server(debug=False)
