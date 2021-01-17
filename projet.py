@@ -311,8 +311,8 @@ if __name__ == '__main__':
 def update_mapProduction(input_value):
     """
     Change la plage de données à afficher sur la carte en fonction de la surface sélectionnée
-    Args: 
-        input_value[0] min 
+    Args:
+        input_value[0] min
         input_value[1] max
     """
     imax = np.exp(input_value[1])
@@ -323,7 +323,6 @@ def update_mapProduction(input_value):
     mapProduction = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe', size_max=10,
                             center=center_lat_lon, color="production_surface", size="surface",
                             projection="natural earth")
-
     mapProduction.update_layout(transition_duration=500, geo = dict(projection_scale=5))
     return mapProduction
 
@@ -338,7 +337,7 @@ def update_mapProduction(input_value):
 def update_mapConstructeurs(input_value):
     """
     Change la plage de données à afficher sur la carte en fonction des années cochées
-    Args: 
+    Args:
         Series "year"[]
     """
     proddf = france[france.an_installation == 67]
@@ -367,7 +366,7 @@ def update_mapConstructeurs(input_value):
 def update_violonPuissance(input_value):
     """
     Change la plage de données à afficher sur le graph en fonction des années cochées
-    Args: 
+    Args:
         Series "year"[]
     """
     proddf = france[france.an_installation == 67]
@@ -383,6 +382,9 @@ def update_violonPuissance(input_value):
     violonPuissance = px.violin(proddf, y=proddf.puissance_crete,x="an_installation",log_y=True,
                                 log_x=False, color="an_installation", box=True,
                                 hover_data=proddf.columns)
+    violonPuissance.layout.xaxis.title=Nom_colonnes['an_installation']
+    violonPuissance.layout.yaxis.title=Nom_colonnes['puissance_crete']
+
     violonPuissance.update_layout(transition_duration=500)
     violonPuissance.update_xaxes(type='category')
     return violonPuissance
@@ -399,8 +401,8 @@ def update_violonPuissance(input_value):
 def update_figureProdPente(input_value):
     """
     Change la plage de données à afficher sur le graph en fonction de la surface sélectionnée
-    Args: 
-        input_value[0] min 
+    Args:
+        input_value[0] min
         input_value[1] max
     """
     imax = np.exp(input_value[1])
