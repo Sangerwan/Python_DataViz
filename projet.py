@@ -284,6 +284,10 @@ if __name__ == '__main__':
                 className= "blocConstructeur",
                 children=[
                 html.Div(
+                    'Le rendement moyen et la répartition des installations à différentes années',
+                    style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
+                ),
+                html.Div(
                     className= "graphConstructeur",
                     children=[
                         html.Div(
