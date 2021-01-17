@@ -79,7 +79,7 @@ if __name__ == '__main__':
 
     unique_par_an = france.groupby('an_installation').size()
 
-    figPolar = px.scatter_polar(france, r="nb_panneaux",log_r=True, theta="orientation_polar")
+    figPolar = px.scatter_polar(france, r="nb_panneaux",log_r=True, theta="orientation_polar",color='production_surface',range_color=[20,300])
     center_lat_lon = dict({'lat': 46, 'lon': 2})
 
     app.layout = html.Div(
@@ -245,7 +245,7 @@ if __name__ == '__main__':
                     html.Div(
                         children=[
                             dcc.Graph(
-                                id='graphFabriquants'
+                                id='graphPuissanceCrete'
                                 ),
                             ],
                         ),
@@ -298,21 +298,24 @@ if __name__ == '__main__':
     dash.dependencies.Output('map', 'figure'),
     dash.dependencies.Input('surface-slider', 'value')
     )
-def update_figure2(input_value):
+def update_mapProduction(input_value):
     """
-    description...
+    Change la plage de données à afficher sur la carte en fonction de la surface sélectionnée
+    Args: 
+        input_value[0] min 
+        input_value[1] max
     """
     imax = np.exp(input_value[1])
     imin = np.exp(input_value[0])
     proddf = france[france.surface <= imax]
     proddf = proddf[proddf.surface >= imin]
 
-    figure = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe', size_max=10,
+    mapProduction = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe', size_max=10,
                             center=center_lat_lon, color="production_surface", size="surface",
                             projection="natural earth")
 
-    figure.update_layout(transition_duration=500, geo = dict(projection_scale=5))
-    return figure
+    mapProduction.update_layout(transition_duration=500, geo = dict(projection_scale=5))
+    return mapProduction
 
 
 #-----------------------------------
@@ -322,9 +325,11 @@ def update_figure2(input_value):
     dash.dependencies.Output('mapFabriquants', 'figure'),
     dash.dependencies.Input('chexboxFabriquants', 'value')
     )
-def update_figure3(input_value):
+def update_mapConstructeurs(input_value):
     """
-    description...
+    Change la plage de données à afficher sur la carte en fonction des années cochées
+    Args: 
+        Series "year"[]
     """
     proddf = france[france.an_installation == 67]
     year_data = france[france.an_installation == 66]
@@ -335,24 +340,25 @@ def update_figure3(input_value):
     else :
         proddf = france
 
-    map_constructeurs = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe',size_max=15,
+    mapConstructeurs = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe',size_max=15,
                                         center=center_lat_lon, color="panneaux_marque",
                                         projection="natural earth")
 
-    map_constructeurs.update_layout(transition_duration=500, geo = dict(projection_scale=5))
-    return map_constructeurs
-
+    mapConstructeurs.update_layout(transition_duration=500, geo = dict(projection_scale=5))
+    return mapConstructeurs
 
 #-----------------------------------
-#CHECKBOX => GRAPH VIOLIN FABRIQUANTS
+#CHECKBOX => GRAPH VIOLIN PUISSANCE
 #-----------------------------------
 @app.callback(
-    dash.dependencies.Output('graphFabriquants', 'figure'),
+    dash.dependencies.Output('graphPuissanceCrete', 'figure'),
     dash.dependencies.Input('chexboxFabriquants', 'value')
     )
-def update_figure4(input_value):
+def update_violonPuissance(input_value):
     """
-    description...
+    Change la plage de données à afficher sur le graph en fonction des années cochées
+    Args: 
+        Series "year"[]
     """
     proddf = france[france.an_installation == 67]
     year_data = france[france.an_installation == 66]
@@ -364,38 +370,41 @@ def update_figure4(input_value):
         proddf = france
         input_value = france.an_installation
 
-    fig_puissance = px.violin(proddf, y=proddf.puissance_crete,x="an_installation",log_y=True,
+    violonPuissance = px.violin(proddf, y=proddf.puissance_crete,x="an_installation",log_y=True,
                                 log_x=False, color="an_installation", box=True,
                                 hover_data=proddf.columns)
-    fig_puissance.update_layout(transition_duration=500)
-    fig_puissance.update_xaxes(type='category')
-    return fig_puissance
+    violonPuissance.update_layout(transition_duration=500)
+    violonPuissance.update_xaxes(type='category')
+    return violonPuissance
 
 
 
 #-----------------------------------
-#YEAR DROPDOWN => HISTOGRAM
+#YEAR DROPDOWN => HISTOGRAM PROD/PENTE
 #-----------------------------------
 @app.callback(
     dash.dependencies.Output('graph3', 'figure'),
     dash.dependencies.Input('surface-slider', 'value')
     )
-def update_figure5(input_value):
+def update_figureProdPente(input_value):
     """
-    description...
+    Change la plage de données à afficher sur le graph en fonction de la surface sélectionnée
+    Args: 
+        input_value[0] min 
+        input_value[1] max
     """
     imax = np.exp(input_value[1])
     imin = np.exp(input_value[0])
     proddf = france[france.surface <= imax]
     proddf = proddf[proddf.surface >= imin]
 
-    fig2 = px.scatter(proddf, x="pente", y="orientation",
+    figureProdPente = px.scatter(proddf, x="pente", y="orientation",
                         color="production_surface",
                     hover_name="nb_panneaux")
 
-    fig2.update_layout(transition_duration=500)
-    fig2.update_coloraxes(showscale=False)
-    return fig2
+    figureProdPente.update_layout(transition_duration=500)
+    figureProdPente.update_coloraxes(showscale=False)
+    return figureProdPente
 
 
 @app.callback(
