@@ -211,6 +211,11 @@ if __name__ == '__main__':
                         id='polar',
                         figure=figPolar
                      ),
+
+                     html.Div(
+                        'Moyenne d\'orientation des panneaux',
+                        style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
+                        ),
                ]),
 
 
@@ -219,8 +224,8 @@ if __name__ == '__main__':
                 children=[
 
                 html.Div(
-                'Moyenne d\'orientation des panneaux',
-                style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
+                    'La production selon la localisation, la pente ou l\'orientation',
+                    style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
                 ),
 
                 html.Div(

@@ -6,8 +6,22 @@ Données utilisées : https://www.data.gouv.fr/fr/datasets/donnees-sur-les-insta
 
 Rapport d'analyse:
 
-On remarque que les panneaux solaire sont majoritairement installée de façon non optimale (orientation/pente).
-On constate tout de même une production plus importante des panneaux orientés vers le sud
+Où en est le photovoltaïque Français ?
+
+Ce projet à pour but de globaliser les données francaises du photovoltaïque et avec cette vue d'ensemble de passer au crible les éléments cruciaux de la production d'éléctricité solaire
+Constitué de 8 graphiques et cartes divers il permete de mettre en lumière les points clés de ce domaine.
+
+Le 1er graphe bien que personnalisable à souhait montre dans un 1er temps le pic d'installation flagrant 
+l'essor du photovoltaïque en france: A partir des années 2008 pour un "age d'or" en 2010-2011 avec plus de 100k d'installations'
+
+Le 2ème 
+
+Sue la projection qui compare la pente optimum et la pente réellement utilisée,
+on remarque que les panneaux solaire sont majoritairement installée de façon non optimale (orientation/pente).
+
+La projection polaire nous permet également de vérifier une production plus importante des panneaux orientés vers le sud,
+mais également que c'est un phènomène connu puisque la majorité des installation sont comprise dans le cadran 90°-270° autremeent dit orienté vers le sud
+
 
 
 User Guide:
