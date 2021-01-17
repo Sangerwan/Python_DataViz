@@ -80,6 +80,7 @@ if __name__ == '__main__':
     unique_par_an = france.groupby('an_installation').size()
 
     figPolar = px.scatter_polar(france, r="production_surface",log_r=True, theta="orientation_polar",color='production_surface',range_color=[20,300])
+    figPolar.update_polars(radialaxis ={'visible':False})
     center_lat_lon = dict({'lat': 46, 'lon': 2})
 
     app.layout = html.Div(className="main",

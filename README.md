@@ -9,7 +9,7 @@ Rapport d'analyse:
 Où en est le photovoltaïque Français ?
 
 Ce projet à pour but de globaliser les données francaises du photovoltaïque et avec cette vue d'ensemble de passer au crible les éléments cruciaux de la production d'éléctricité solaire
-Constitué de 8 graphiques et cartes divers il permete de mettre en lumière les points clés de ce domaine.
+Constitué de 8 graphiques et cartes divers il permet de mettre en lumière les points clés de ce domaine.
 
 Le 1er graphe bien que personnalisable à souhait montre dans un 1er temps le pic d'installation flagrant 
 l'essor du photovoltaïque en france: A partir des années 2008 pour un "age d'or" en 2010-2011 avec plus de 100k d'installations'
