@@ -90,10 +90,18 @@ if __name__ == '__main__':
                 style={'textAlign': 'center', 'color': '#7FDBFF'}
                 ),
 
+            html.H2(
+                children='Où en est le photovoltaïque Français ? Vue globale des spécifités à connaitre...',
+                style={'textAlign': 'center'}
+                ),
+
+            html.H2(),
+            html.H2(),
+
             html.Div([
                 
 
-                html.Div([
+                html.Div(className ="fig1Config", children=[
                     html.Div(
                             id='figure1_title',
                             style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
@@ -160,8 +168,9 @@ if __name__ == '__main__':
                     ])
                 ]),
 
+            html.H2(),
 
-            html.Div([
+            html.Div(className ="nombrePanneaux", children=[
                 html.Div(
                     'Nombre de panneaux installés par année',
                     style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
@@ -182,6 +191,8 @@ if __name__ == '__main__':
                         value=2006),
                     ]),
                 ]),
+
+            html.H2(),
 
             html.Div(className= "pente_orientation",
                 children=[
@@ -208,10 +219,11 @@ if __name__ == '__main__':
                     ]),
                 ]),
 
+            html.H2(),
+
             html.Div(
                 className= "polarGraph",
                 children= [
-
                     html.Div(
                         'Moyenne d\'orientation des panneaux et leurs productions',
                         style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
@@ -221,10 +233,9 @@ if __name__ == '__main__':
                         id='polar',
                         figure=figPolar
                      ),
-
-                     
                ]),
 
+            html.H2(),
 
             html.Div(
                 className= "blocSlider",
@@ -247,6 +258,7 @@ if __name__ == '__main__':
                         ]
                     ),
 
+
                 dcc.RangeSlider(
                     id='surface-slider',
                     min=np.log(france['surface'].min()),
@@ -264,42 +276,48 @@ if __name__ == '__main__':
                         6 : '100 Hectares',
                         },
                     ),
+                    html.H2(),
              ]),
 
+            html.H2(),
 
             html.Div(
-                className= "graphConstructeur",
+                className= "blocConstructeur",
                 children=[
-                    html.Div(
-                        children=[
-                            dcc.Graph(
-                                id='graphPuissanceCrete'
-                                ),
-                            ],
-                        ),
-                    html.Div(
-                        children=[
-                            dcc.Graph(
-                                id='mapFabriquants'
-                                ),
-                            ],
-                        )
-                    ]
-                ),
-
-            html.Div(
-                className= "chexbox",
-                children=dcc.Checklist(
-                    id='chexboxFabriquants',
-                    options=[
-                        {'label': i, 'value': i} for i in np.sort(france.an_installation.unique())
-                        ],
-                    value=[2004,2006],
+                html.Div(
+                    className= "graphConstructeur",
+                    children=[
+                        html.Div(
+                            children=[
+                                dcc.Graph(
+                                    id='graphPuissanceCrete'
+                                    ),
+                                ],
+                            ),
+                        html.Div(
+                            children=[
+                                dcc.Graph(
+                                    id='mapFabriquants'
+                                    ),
+                                ],
+                            )
+                        ]
                     ),
-                ),
 
+                html.H2(),
 
-
+                html.Div(
+                    className= "chexbox",
+                    children=dcc.Checklist(
+                        id='chexboxFabriquants',
+                        options=[
+                            {'label': i, 'value': i} for i in np.sort(france.an_installation.unique())
+                            ],
+                        value=[2004,2006],
+                        ),
+                    ),
+                ]),
+            html.H2(),
 
             html.Div(
                 className="app-header",
@@ -539,7 +557,7 @@ def update_scatter_pente_title(dropdown_value):
         return 'Comparaison entre la pente optimum et la pente actuelle'
 
     if dropdown_value == 'orientation':
-        return 'Comparaison entre l\'orientation optimum et l\'orientation actuelle'
+        return 'Comparaison entre l\'orientation optimum et l\'orientation utilisée'
 
     print('type error')
     return 'type error'

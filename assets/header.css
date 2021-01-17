@@ -25,15 +25,10 @@
 	display: flex;
 	flex-direction: row;
 }
-.blocSlider {
+
+.polarGraph, .pente_orientation, .blocSlider, .fig1Config, .nombrePanneaux, .blocConstructeur {
 	border-style: solid;
-	margin : 5px;
-}
-
-.pente_orientation {
-	box-sizing: content-box;
-	border-style: dashed;
-
+	margin: 3px;
 }
 
 .main {
