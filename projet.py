@@ -194,12 +194,12 @@ if __name__ == '__main__':
                 ]),
 
             html.Div(
-                className= "graphSurfaceProduction",
+                className= "polarGraph",
                 children= [
                     dcc.Graph(
-                        id='graph3skks',
+                        id='polar',
                         figure=figPolar
-                        ),
+                     ),
 
                     html.Div(
                         'Moyenne d\'orientation des panneaux',
@@ -225,7 +225,7 @@ if __name__ == '__main__':
                 min=np.log(france['surface'].min()),
                 max=6,
 
-                value=[4,4.5],
+                value=[4,4.3],
                 step=0.2,
                 marks={
                     0 : '0 m²',
