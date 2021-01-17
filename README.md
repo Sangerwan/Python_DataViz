@@ -27,7 +27,7 @@ Il également intéressant de noter
 
 User Guide:
 
-L'application repose sur plusieurs modules qu'ils faudra importer avant de la lancer.
+L'application repose sur plusieurs modules qu'il faudra importer avant de la lancer.
 Une fois l'application python exécutée, un dashboard est créé à l'adresse http://127.0.0.1:8050/
 Le dashboard permet de visualiser les données présentes dans la base de donnée.
 Plusieurs intéractions sont possibles a travers des boutons, menu déroulant, ...
