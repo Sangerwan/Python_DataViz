@@ -68,9 +68,9 @@ Nom_colonnes = {
     'production_pvgis': 'production annuelle (kWh)',
     'lat': 'latitude',
     'lon': 'longitude',
+    'production_surface' : 'production/surface'
     }
 
-print(france.pente_optimum)
 if __name__ == '__main__':
 
     app = dash.Dash(__name__)
@@ -129,28 +129,35 @@ if __name__ == '__main__':
                 ),
 
             html.Div([
-                dcc.Dropdown(
-                    id='figure1_type',
-                    options=[
-                        {'label': 'Histogramme', 'value': 'Histogramme'},
-                        {'label': 'Nuage de points', 'value': 'Nuage'}
-                        ],
-                    value='Histogramme',
-                    clearable=False,),
-                ]),
-
-            html.Div([
                 dcc.Graph(
                     id='figure1',
                     ),
 
                 html.Div([
                     html.Div(
-                        id='figure1_title',
-                        style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
+                            id='figure1_title',
+                            style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
                         ),
 
                     html.Div([
+                        html.Div(
+                                'Type du graphique: '
+                                ),
+                        dcc.Dropdown(
+                            id='figure1_type',
+                            options=[
+                                {'label': 'Histogramme', 'value': 'Histogramme'},
+                                {'label': 'Nuage de points', 'value': 'Nuage'}
+                                ],
+                            value='Histogramme',
+                            clearable=False,),
+                        ]),
+
+                    html.Div([
+
+                        html.Div(
+                            'abscisse: '
+                        ),
                         dcc.Dropdown(
                             id='x_dropdown_figure1',
                             options=[
@@ -161,10 +168,13 @@ if __name__ == '__main__':
                             placeholder='',
                             )
                         ],
-                        style={'width': '49%', 'display': 'inline-block'}
+                        style={'width': '50%', 'display': 'inline-block'}
                         ),
 
                     html.Div([
+                        html.Div(
+                        'ordonnée: '
+                        ),
                         dcc.Dropdown(
                             id='y_dropdown_figure1',
                             options=[
@@ -175,7 +185,7 @@ if __name__ == '__main__':
                             placeholder='',
                             )
                         ],
-                        style={'width': '49%', 'display': 'inline-block'}
+                        style={'width': '50%', 'display': 'inline-block'}
                         ),
                     ]),
 
@@ -541,7 +551,7 @@ def update_scatter_pente_title(dropdown_value):
         return 'Comparaison entre la pente optimum et la pente actuelle'
 
     if dropdown_value == 'orientation':
-        return 'Comparaison entre la orientation optimum et la orientation actuelle'
+        return 'Comparaison entre l\'orientation optimum et l\'orientation actuelle'
 
     print('type error')
     return 'type error'
