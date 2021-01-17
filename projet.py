@@ -38,8 +38,10 @@ df = df[df.surface != 0]
 df=df.fillna(0)
 france = df.query("country == 'France'")
 
+orientation_polar = np.zeros(len(france.orientation))
 for i in range(len(france.orientation)):
-    france.orientation.array[i] = str(int(france.orientation.array[i]) + 180)
+    orientation_polar[i] = str(int(france.orientation.array[i]) + 180)
+france.insert(7,'orientation_polar',orientation_polar,True)
 
 production_surface = np.zeros(len(france.production_pvgis))
 for i in range(len(france.production_pvgis)):
@@ -77,47 +79,7 @@ if __name__ == '__main__':
 
     unique_par_an = france.groupby('an_installation').size()
 
-    #fig1 = px.histogram(
-    #    france,
-    #    x='an_installation',
-    #    y='nb_panneaux',
-    #    labels={'an_installation' : 'année d\'installation','nb_panneaux' : 'nombres de panneaux'}
-    #    )
-
-    #fig3 = px.histogram(france, x='panneaux_marque',y='nb_panneaux')
-    #fig3.layout.xaxis.title = "marque du panneau"
-    #fig3.layout.yaxis.title = "nombre de panneaux installés"
-    #fig3.update_xaxes(categoryorder="total descending")
-
-
-    #fig_puissance = px.violin(france, y=france.puissance_crete,x="an_installation",log_y=True,
-    #                            log_x=False, color="an_installation", box=True,
-    #                            hover_data=france.columns)
-
-    #fig2 = px.scatter(france, x="pente", y="orientation",
-    #                    color="production_surface",
-    #                    hover_name="nb_panneaux")
-
-    #fig = px.scatter_geo(france,lon="lon",lat="lat",scope='europe',size_max=15,center=center_lat_lon,
-    #                        color="production_surface", size="surface",projection="natural earth")
-
-    #map_constructeurs = px.scatter_geo(france, lon="lon",lat="lat",scope='europe',size_max=15,
-    #                                    center=center_lat_lon, color="panneaux_marque",
-    #                                    projection="natural earth")
-
-    #labelsValues = []
-    #AnneeInstallUnique = np.sort(france.an_installation.unique())
-    #for i in range(len(AnneeInstallUnique)):
-    #    if AnneeInstallUnique[i] != 1993:
-    #        labelsValues.append(
-    #            dict({'label' : AnneeInstallUnique[i], 'value': AnneeInstallUnique[i]})
-    #            )
-
-
-    #map_constructeurs.update_layout(transition_duration=500, geo = dict(projection_scale=5))
-    #fig.update_layout(transition_duration=500, geo = dict(projection_scale=5))
-
-    figPolar = px.scatter_polar(france, r="nb_panneaux",log_r=True, theta="orientation")
+    figPolar = px.scatter_polar(france, r="nb_panneaux",log_r=True, theta="orientation_polar",color='production_surface',range_color=[20,300])
     center_lat_lon = dict({'lat': 46, 'lon': 2})
 
     app.layout = html.Div(
@@ -242,16 +204,17 @@ if __name__ == '__main__':
                 ]),
 
             html.Div(
-                className= "graphSurfaceProduction",
+                className= "polarGraph",
                 children= [
-                    #dcc.Graph(
-                    #    id='histogram1',
-                    #    figure=fig1
-                    #    ),
                     dcc.Graph(
-                        id='graph3skks',
+                        id='polar',
                         figure=figPolar
-                        )
+                     ),
+
+                    html.Div(
+                        'Moyenne d\'orientation des panneaux',
+                        style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
+                        ),
                     ]
                 ),
 
@@ -260,11 +223,9 @@ if __name__ == '__main__':
                 children=[
                     dcc.Graph(
                         id='map',
-                        #figure=fig
                         ),
                     dcc.Graph(
-                        id='graph3',
-                        #figure=fig2
+                        id='graph3'
                         ),
                     ]
                 ),
@@ -274,7 +235,7 @@ if __name__ == '__main__':
                 min=np.log(france['surface'].min()),
                 max=6,
 
-                value=[4,4.5],
+                value=[4,4.3],
                 step=0.2,
                 marks={
                     0 : '0 m²',
@@ -294,16 +255,14 @@ if __name__ == '__main__':
                     html.Div(
                         children=[
                             dcc.Graph(
-                                id='graphFabriquants',
-                                #figure=fig_puissance
+                                id='graphPuissanceCrete'
                                 ),
                             ],
                         ),
                     html.Div(
                         children=[
                             dcc.Graph(
-                                id='mapFabriquants',
-                                #figure=map_constructeurs
+                                id='mapFabriquants'
                                 ),
                             ],
                         )
@@ -349,21 +308,24 @@ if __name__ == '__main__':
     dash.dependencies.Output('map', 'figure'),
     dash.dependencies.Input('surface-slider', 'value')
     )
-def update_figure2(input_value):
+def update_mapProduction(input_value):
     """
-    description...
+    Change la plage de données à afficher sur la carte en fonction de la surface sélectionnée
+    Args: 
+        input_value[0] min 
+        input_value[1] max
     """
     imax = np.exp(input_value[1])
     imin = np.exp(input_value[0])
     proddf = france[france.surface <= imax]
     proddf = proddf[proddf.surface >= imin]
 
-    figure = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe', size_max=10,
+    mapProduction = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe', size_max=10,
                             center=center_lat_lon, color="production_surface", size="surface",
                             projection="natural earth")
 
-    figure.update_layout(transition_duration=500, geo = dict(projection_scale=5))
-    return figure
+    mapProduction.update_layout(transition_duration=500, geo = dict(projection_scale=5))
+    return mapProduction
 
 
 #-----------------------------------
@@ -373,9 +335,11 @@ def update_figure2(input_value):
     dash.dependencies.Output('mapFabriquants', 'figure'),
     dash.dependencies.Input('chexboxFabriquants', 'value')
     )
-def update_figure3(input_value):
+def update_mapConstructeurs(input_value):
     """
-    description...
+    Change la plage de données à afficher sur la carte en fonction des années cochées
+    Args: 
+        Series "year"[]
     """
     proddf = france[france.an_installation == 67]
     year_data = france[france.an_installation == 66]
@@ -386,24 +350,25 @@ def update_figure3(input_value):
     else :
         proddf = france
 
-    map_constructeurs = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe',size_max=15,
+    mapConstructeurs = px.scatter_geo(proddf, lon="lon",lat="lat",scope='europe',size_max=15,
                                         center=center_lat_lon, color="panneaux_marque",
                                         projection="natural earth")
 
-    map_constructeurs.update_layout(transition_duration=500, geo = dict(projection_scale=5))
-    return map_constructeurs
-
+    mapConstructeurs.update_layout(transition_duration=500, geo = dict(projection_scale=5))
+    return mapConstructeurs
 
 #-----------------------------------
-#CHECKBOX => GRAPH VIOLIN FABRIQUANTS
+#CHECKBOX => GRAPH VIOLIN PUISSANCE
 #-----------------------------------
 @app.callback(
-    dash.dependencies.Output('graphFabriquants', 'figure'),
+    dash.dependencies.Output('graphPuissanceCrete', 'figure'),
     dash.dependencies.Input('chexboxFabriquants', 'value')
     )
-def update_figure4(input_value):
+def update_violonPuissance(input_value):
     """
-    description...
+    Change la plage de données à afficher sur le graph en fonction des années cochées
+    Args: 
+        Series "year"[]
     """
     proddf = france[france.an_installation == 67]
     year_data = france[france.an_installation == 66]
@@ -415,38 +380,41 @@ def update_figure4(input_value):
         proddf = france
         input_value = france.an_installation
 
-    fig_puissance = px.violin(proddf, y=proddf.puissance_crete,x="an_installation",log_y=True,
+    violonPuissance = px.violin(proddf, y=proddf.puissance_crete,x="an_installation",log_y=True,
                                 log_x=False, color="an_installation", box=True,
                                 hover_data=proddf.columns)
-    fig_puissance.update_layout(transition_duration=500)
-    fig_puissance.update_xaxes(type='category')
-    return fig_puissance
+    violonPuissance.update_layout(transition_duration=500)
+    violonPuissance.update_xaxes(type='category')
+    return violonPuissance
 
 
 
 #-----------------------------------
-#YEAR DROPDOWN => HISTOGRAM
+#YEAR DROPDOWN => HISTOGRAM PROD/PENTE
 #-----------------------------------
 @app.callback(
     dash.dependencies.Output('graph3', 'figure'),
     dash.dependencies.Input('surface-slider', 'value')
     )
-def update_figure5(input_value):
+def update_figureProdPente(input_value):
     """
-    description...
+    Change la plage de données à afficher sur le graph en fonction de la surface sélectionnée
+    Args: 
+        input_value[0] min 
+        input_value[1] max
     """
     imax = np.exp(input_value[1])
     imin = np.exp(input_value[0])
     proddf = france[france.surface <= imax]
     proddf = proddf[proddf.surface >= imin]
 
-    fig2 = px.scatter(proddf, x="pente", y="orientation",
+    figureProdPente = px.scatter(proddf, x="pente", y="orientation",
                         color="production_surface",
                     hover_name="nb_panneaux")
 
-    fig2.update_layout(transition_duration=500)
-    fig2.update_coloraxes(showscale=False)
-    return fig2
+    figureProdPente.update_layout(transition_duration=500)
+    figureProdPente.update_coloraxes(showscale=False)
+    return figureProdPente
 
 
 @app.callback(

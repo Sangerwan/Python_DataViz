@@ -11,21 +11,27 @@
 		padding-left: 5px;
 	}
 
-.map{
+.map {
 	display: flex;
 	flex-direction: column;
 }
 .graphSurfaceProduction {
 	display: flex;
 	flex-direction: row;
+	box-sizing: content-box;
+	border-bottom-style: double;
 }
 
 .graphConstructeur {
 	display: flex;
 	flex-direction: row;
+	box-sizing: content-box;
+	border-bottom-style: double;
 }
 .checkbox {
 	display: flex;
 	flex-direction: row;
+	box-sizing: content-box;
 }
+
 	
