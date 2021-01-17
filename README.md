@@ -6,6 +6,8 @@ Données utilisées : https://www.data.gouv.fr/fr/datasets/donnees-sur-les-insta
 
 Rapport d'analyse:
 
+On remarque que les panneaux solaire sont majoritairement installée de façon non optimale (orientation/pente).
+On constate tout de même une production plus importante des panneaux orientés vers le sud
 
 
 User Guide:
