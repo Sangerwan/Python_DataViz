@@ -38,8 +38,10 @@ df = df[df.surface != 0]
 df=df.fillna(0)
 france = df.query("country == 'France'")
 
+orientation_polar = np.zeros(len(france.orientation))
 for i in range(len(france.orientation)):
-    france.orientation.array[i] = str(int(france.orientation.array[i]) + 180)
+    orientation_polar[i] = str(int(france.orientation.array[i]) + 180)
+france.insert(7,'orientation_polar',orientation_polar,True)
 
 production_surface = np.zeros(len(france.production_pvgis))
 for i in range(len(france.production_pvgis)):
@@ -77,47 +79,7 @@ if __name__ == '__main__':
 
     unique_par_an = france.groupby('an_installation').size()
 
-    #fig1 = px.histogram(
-    #    france,
-    #    x='an_installation',
-    #    y='nb_panneaux',
-    #    labels={'an_installation' : 'année d\'installation','nb_panneaux' : 'nombres de panneaux'}
-    #    )
-
-    #fig3 = px.histogram(france, x='panneaux_marque',y='nb_panneaux')
-    #fig3.layout.xaxis.title = "marque du panneau"
-    #fig3.layout.yaxis.title = "nombre de panneaux installés"
-    #fig3.update_xaxes(categoryorder="total descending")
-
-
-    #fig_puissance = px.violin(france, y=france.puissance_crete,x="an_installation",log_y=True,
-    #                            log_x=False, color="an_installation", box=True,
-    #                            hover_data=france.columns)
-
-    #fig2 = px.scatter(france, x="pente", y="orientation",
-    #                    color="production_surface",
-    #                    hover_name="nb_panneaux")
-
-    #fig = px.scatter_geo(france,lon="lon",lat="lat",scope='europe',size_max=15,center=center_lat_lon,
-    #                        color="production_surface", size="surface",projection="natural earth")
-
-    #map_constructeurs = px.scatter_geo(france, lon="lon",lat="lat",scope='europe',size_max=15,
-    #                                    center=center_lat_lon, color="panneaux_marque",
-    #                                    projection="natural earth")
-
-    #labelsValues = []
-    #AnneeInstallUnique = np.sort(france.an_installation.unique())
-    #for i in range(len(AnneeInstallUnique)):
-    #    if AnneeInstallUnique[i] != 1993:
-    #        labelsValues.append(
-    #            dict({'label' : AnneeInstallUnique[i], 'value': AnneeInstallUnique[i]})
-    #            )
-
-
-    #map_constructeurs.update_layout(transition_duration=500, geo = dict(projection_scale=5))
-    #fig.update_layout(transition_duration=500, geo = dict(projection_scale=5))
-
-    figPolar = px.scatter_polar(france, r="nb_panneaux",log_r=True, theta="orientation")
+    figPolar = px.scatter_polar(france, r="nb_panneaux",log_r=True, theta="orientation_polar")
     center_lat_lon = dict({'lat': 46, 'lon': 2})
 
     app.layout = html.Div(
@@ -234,14 +196,15 @@ if __name__ == '__main__':
             html.Div(
                 className= "graphSurfaceProduction",
                 children= [
-                    #dcc.Graph(
-                    #    id='histogram1',
-                    #    figure=fig1
-                    #    ),
                     dcc.Graph(
                         id='graph3skks',
                         figure=figPolar
-                        )
+                        ),
+
+                    html.Div(
+                        'Moyenne d\'orientation des panneaux',
+                        style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
+                        ),
                     ]
                 ),
 
@@ -250,11 +213,9 @@ if __name__ == '__main__':
                 children=[
                     dcc.Graph(
                         id='map',
-                        #figure=fig
                         ),
                     dcc.Graph(
-                        id='graph3',
-                        #figure=fig2
+                        id='graph3'
                         ),
                     ]
                 ),
@@ -284,16 +245,14 @@ if __name__ == '__main__':
                     html.Div(
                         children=[
                             dcc.Graph(
-                                id='graphFabriquants',
-                                #figure=fig_puissance
+                                id='graphFabriquants'
                                 ),
                             ],
                         ),
                     html.Div(
                         children=[
                             dcc.Graph(
-                                id='mapFabriquants',
-                                #figure=map_constructeurs
+                                id='mapFabriquants'
                                 ),
                             ],
                         )
