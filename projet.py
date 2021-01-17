@@ -79,10 +79,10 @@ if __name__ == '__main__':
 
     unique_par_an = france.groupby('an_installation').size()
 
-    figPolar = px.scatter_polar(france, r="nb_panneaux",log_r=True, theta="orientation_polar",color='production_surface',range_color=[20,300])
+    figPolar = px.scatter_polar(france, r="production_surface",log_r=True, theta="orientation_polar",color='production_surface',range_color=[20,300])
     center_lat_lon = dict({'lat': 46, 'lon': 2})
 
-    app.layout = html.Div(
+    app.layout = html.Div(className="main",
         children=([
 
             html.H1(
@@ -170,7 +170,8 @@ if __name__ == '__main__':
                     ]),
                 ]),
 
-            html.Div([
+            html.Div(className= "pente_orientation",
+                children=[
                 dcc.Graph(
                     id='scatter_pente_orientation',
                     ),
@@ -200,43 +201,48 @@ if __name__ == '__main__':
                         id='polar',
                         figure=figPolar
                      ),
+               ]),
 
-                    html.Div(
-                        'Moyenne d\'orientation des panneaux',
-                        style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
-                        ),
-                    ]
-                ),
 
             html.Div(
-                className= "graphSurfaceProduction",
+                className= "blocSlider",
                 children=[
-                    dcc.Graph(
-                        id='map',
-                        ),
-                    dcc.Graph(
-                        id='graph3'
-                        ),
-                    ]
+
+                html.Div(
+                'Moyenne d\'orientation des panneaux',
+                style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
                 ),
 
-            dcc.RangeSlider(
-                id='surface-slider',
-                min=np.log(france['surface'].min()),
-                max=6,
+                html.Div(
+                    className= "graphSurfaceProduction",
+                    children=[
+                        dcc.Graph(
+                            id='map',
+                            ),
+                        dcc.Graph(
+                            id='graph3'
+                            ),
+                        ]
+                    ),
 
-                value=[4,4.3],
-                step=0.2,
-                marks={
-                    0 : '0 m²',
-                    1 : '10 m²',
-                    2 : '100 m²',
-                    3 : '1000 m²',
-                    4 : '1 Hectares',
-                    5 : '10 Hectares',
-                    6 : '100 Hectares',
-                    },
-                ),
+                dcc.RangeSlider(
+                    id='surface-slider',
+                    min=np.log(france['surface'].min()),
+                    max=6,
+
+                    value=[4,4.3],
+                    step=0.2,
+                    marks={
+                        0 : '0 m²',
+                        1 : '10 m²',
+                        2 : '100 m²',
+                        3 : '1000 m²',
+                        4 : '1 Hectares',
+                        5 : '10 Hectares',
+                        6 : '100 Hectares',
+                        },
+                    ),
+             ]),
 
 
             html.Div(
