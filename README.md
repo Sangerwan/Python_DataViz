@@ -20,8 +20,9 @@ Sue la projection qui compare la pente optimum et la pente réellement utilisée
 on remarque que les panneaux solaire sont majoritairement installée de façon non optimale (orientation/pente).
 
 La projection polaire nous permet également de vérifier une production plus importante des panneaux orientés vers le sud,
-mais également que c'est un phènomène connu puisque la majorité des installation sont comprise dans le cadran 90°-270° autremeent dit orienté vers le sud
+mais également que c'est un phènomène connu puisque la majorité des installation sont comprise dans le cadran 90°-270° autrement dit orienté vers le sud
 
+Il également intéressant de noter 
 
 
 User Guide:

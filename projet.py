@@ -91,14 +91,16 @@ if __name__ == '__main__':
                 ),
 
             html.Div([
-                dcc.Graph(
-                    id='figure1',
-                    ),
+                
 
                 html.Div([
                     html.Div(
                             id='figure1_title',
                             style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
+                        ),
+                        
+                        dcc.Graph(
+                            id='figure1',
                         ),
 
                     html.Div([
@@ -160,14 +162,15 @@ if __name__ == '__main__':
 
 
             html.Div([
-                dcc.Graph(
-                    id='histogram_brand',
-                    ),
-
                 html.Div(
                     'Nombre de panneaux installés par année',
                     style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
                     ),
+
+                dcc.Graph(
+                    id='histogram_brand',
+                    ),
+
 
                 html.Div([
                     dcc.Dropdown(
@@ -182,14 +185,15 @@ if __name__ == '__main__':
 
             html.Div(className= "pente_orientation",
                 children=[
+                html.Div(
+                    id='scatter_pente_orientation_title',
+                    style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
+                ),
                 dcc.Graph(
                     id='scatter_pente_orientation',
                     ),
 
-                html.Div(
-                    id='scatter_pente_orientation_title',
-                    style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
-                    ),
+               
 
                 html.Div([
                     dcc.Dropdown(
@@ -207,15 +211,18 @@ if __name__ == '__main__':
             html.Div(
                 className= "polarGraph",
                 children= [
+
+                    html.Div(
+                        'Moyenne d\'orientation des panneaux et leurs productions',
+                        style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
+                        ),
+
                     dcc.Graph(
                         id='polar',
                         figure=figPolar
                      ),
 
-                     html.Div(
-                        'Moyenne d\'orientation des panneaux',
-                        style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
-                        ),
+                     
                ]),
 
 
@@ -224,7 +231,7 @@ if __name__ == '__main__':
                 children=[
 
                 html.Div(
-                    'La production selon la localisation, la pente ou l\'orientation',
+                    'La production selon la localisation ou la pente',
                     style={'color': 'blue', 'fontSize': 24,'textAlign': 'center'},
                 ),
 
@@ -421,7 +428,7 @@ def update_figureProdPente(input_value):
     proddf = france[france.surface <= imax]
     proddf = proddf[proddf.surface >= imin]
 
-    figureProdPente = px.scatter(proddf, x="pente", y="orientation",
+    figureProdPente = px.scatter(proddf, x="pente", y="production_surface",
                         color="production_surface",
                     hover_name="nb_panneaux")
 
